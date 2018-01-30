@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import signal
 import random
@@ -30,7 +32,12 @@ httpd = None
 
 def signal_handler(signal, frame):
     print('You pressed Ctrl+C!')
-    httpd.shutdown()
+
+    # return response and shutdown the server
+    import threading
+    assassin = threading.Thread(target=httpd.shutdown)
+    assassin.daemon = True
+    assassin.start()
 
 if __name__ == "__main__":
     port = 8000
