@@ -15,6 +15,8 @@ class MyHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(buff)
 
+    def log_message(self, format, *args):
+        return
 #    def do_HEAD(self):
 #        self._set_headers()
 
@@ -26,7 +28,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
 httpd = None
 
-def signal_handler(signal, frame, httpd):
+def signal_handler(signal, frame):
     print('You pressed Ctrl+C!')
     httpd.shutdown()
 
