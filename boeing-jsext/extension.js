@@ -11,7 +11,7 @@
     };
 
     ext.mcp3008getValue = function(spidev, ch) {
-        return 5;
+        return ch*10;
     };
 
     ext.when_mcp3008changes = function(spidev, ch) {
