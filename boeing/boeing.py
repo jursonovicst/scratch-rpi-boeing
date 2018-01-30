@@ -36,6 +36,7 @@ if __name__ == "__main__":
     httpd = HTTPServer(("127.0.0.1", port), MyHandler)
 
     signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
     print "Serving at port", port
     httpd.serve_forever()
