@@ -14,7 +14,7 @@ class Mcp3008:
 
     def getValues(self):
         for ch in range(0,8):
-            yield {ch : self._mcp.read_adc(ch)}
+            yield (ch, self._mcp.read_adc(ch))
 
     def __del__(self):
         pass
