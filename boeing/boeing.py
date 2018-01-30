@@ -10,8 +10,8 @@ def MakeHandlerClass(mcp):
         _mcp = None
 
         def __init__(self, *args, **kwargs):
-             super(CustomHandler, self).__init__(*args, **kwargs)
              self._mcp = mcp
+             super(CustomHandler, self).__init__(*args, **kwargs)
 
         def do_GET(self):
             buff = ""
@@ -36,29 +36,6 @@ def MakeHandlerClass(mcp):
     #        self.wfile.write("<html><body><h1>POST!</h1></body></html>")
 
     return CustomHandler
-
-class MyHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        buff = ""
-        if self.path == "/poll":
-            for spidev in range(0,2):
-                for ch in range(0,8):
-                    buff += "3008/%d/%d %d\n" % (spidev, ch, random.randint(0,1024))
-
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        self.wfile.write(buff)
-
-    def log_message(self, format, *args):
-        return
-#    def do_HEAD(self):
-#        self._set_headers()
-
-#    def do_POST(self):
-#        # Doesn't do anything with posted data
-#        self._set_headers()
-#        self.wfile.write("<html><body><h1>POST!</h1></body></html>")
 
 
 httpd = None
