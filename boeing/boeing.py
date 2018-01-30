@@ -14,9 +14,8 @@ def MakeHandlerClass(mcp):
         def do_GET(self):
             buff = ""
             if self.path == "/poll":
-                for spidev in range(0, 2):
-                    for ch in range(0, 8):
-                        buff += "3008/%d/%d %d\n" % (spidev, ch, random.randint(0, 1024))
+                for ch, value in self._mcp.getValues():
+                    buff += "3008/%d/%d %d\n" % (0, ch, value)
 
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
