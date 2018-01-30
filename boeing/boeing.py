@@ -6,7 +6,7 @@ import random
 import mcp3008
 
 def MakeHandlerClass(mcp):
-    class CustomHandler(BaseHTTPRequestHandler):
+    class CustomHandler(BaseHTTPRequestHandler, object):
         def __init__(self, *args, **kwargs):
              super(CustomHandler, self).__init__(*args, **kwargs)
              _mcp = mcp
