@@ -7,9 +7,11 @@ import mcp3008
 
 def MakeHandlerClass(mcp):
     class CustomHandler(BaseHTTPRequestHandler, object):
+        _mcp = None
+
         def __init__(self, *args, **kwargs):
              super(CustomHandler, self).__init__(*args, **kwargs)
-             _mcp = mcp
+             self._mcp = mcp
 
         def do_GET(self):
             buff = ""
