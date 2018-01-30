@@ -4,6 +4,11 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import signal
 import random
 
+# Import SPI library (for hardware SPI) and MCP3008 library.
+import Adafruit_GPIO.SPI as SPI
+import Adafruit_MCP3008
+
+
 class MyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         buff = ""
@@ -27,6 +32,9 @@ class MyHandler(BaseHTTPRequestHandler):
 #        self._set_headers()
 #        self.wfile.write("<html><body><h1>POST!</h1></body></html>")
 
+class mcp3008:
+    def
+    
 
 httpd = None
 
