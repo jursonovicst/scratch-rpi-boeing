@@ -1,0 +1,10 @@
+{	"extensionName": "3008",
+	"extensionPort": 8000,
+	"blockSpecs": [
+		["r", "read 3008 on SPI %m.spidev ch %m.3008ch", "3008",0,0],
+	],
+	"menus": {
+		"spidev": ["0", "1"],
+		"3008ch": ["0", "1", "2", "3", "4", "5", "6", "7"],
+	},
+}
