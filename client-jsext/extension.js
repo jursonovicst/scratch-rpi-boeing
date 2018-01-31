@@ -107,6 +107,7 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
+            ['', '1', 'when_thrustLever'],
             ['r', 'read thrust lever %m.thrustlever', 'getThrustLever', 0],
             ['', 'revert thrust lever %m.thrustlever', 'revertThrustLever', 0],
             ['h', 'when thrust lever %m.thrustlever changes', 'when_thrustLever', 0],
