@@ -55,7 +55,7 @@
                     var elements = lines[i].split(' ');
                     var sensor = elements[0].split('/');
                     if( sensor[0] == "mcp3008" && 0 <= Number(sensor[1]) && Number(sensor[1]) <= 1 && 0 <= Number(sensor[2]) && Number(sensor[2]) <= 7 ) {
-                        mcp3008[Number(sensor[1])][Number(sensor[2])] = Math.abs(mcp3008Revert[Number(sensor[1])][Number(sensor[2])] - Number(elements[1])) / 1023;
+                        mcp3008[Number(sensor[1])][Number(sensor[2])] = Math.round(Math.abs(mcp3008Revert[Number(sensor[1])][Number(sensor[2])] - Number(elements[1])) * 1000 / 1023 ) / 1000;
                     }
                 }
             },
@@ -86,27 +86,28 @@
     }
 
     ext.when_MCP3008changes = function( ch, dev ) {
-        if ( typeof when_MCP3008changes.mcp3008 == 'undefined' ) {
-            when_MCP3008changes.mcp3008 = [[-1,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1,-1,-1]];
-        }
-
-        if ( ext.mcp3008[dev][ch] == -1 ) {
+        if ( typeof when_MCP3008changes.old == 'undefined' ) {
+            when_MCP3008changes.old = [[-1,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1,-1,-1]];
             return false;
         }
 
-        if ( when_MCP3008changes.mcp3008[dev][ch] != ext.mcp3008[dev][ch] ) {
-            when_MCP3008changes.mcp3008[dev][ch] = ext.mcp3008[dev][ch];
-            return true;
+        if ( mcp3008[dev][ch] == -1 ) {
+            return false;
         }
 
-        return false;
+        if ( when_MCP3008changes.old[dev][ch] == mcp3008[dev][ch] ) {
+            return false;
+        }
+
+        when_MCP3008changes.old[dev][ch] = mcp3008[dev][ch];
+        return true;
     };
 
     // Block and block menu descriptions
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['', 'v8', 'when_thrustLever'],
+            ['', 'v9', 'when_thrustLever'],
             ['r', 'read mcp3008 ch %m.mcp3008ch dev %m.spidev', 'getMCP3008', 0, 0],
             ['', 'revert mcp3008 ch %m.mcp3008ch dev %m.spidev', 'revertMCP3008', 0, 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch dev %m.spidev changes', 'when_MCP3008changes', 0, 0],
