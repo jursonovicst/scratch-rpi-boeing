@@ -55,7 +55,7 @@
                     var elements = lines[i].split(' ');
                     var sensor = elements[0].split('/');
                     if( sensor[0] == "mcp3008" && 0 <= Number(sensor[1] && Number(sensor[1] <= 1 && 0 <= Number(sensor[2] && Number(sensor[2] <= 7 ) {
-                        mcp3008[Number(sensor[1]][Number(sensor[2]] = Number(elements[1]);
+                        mcp3008[Number(sensor[1])][Number(sensor[2])] = Number(elements[1]);
                     }
                 }
             },
