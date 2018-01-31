@@ -13,7 +13,7 @@
     var boeingAccessURL = "http://127.0.0.1:8000";
 
     // a variable to set the color of the 'LED' indicator for the extension on the Scratch editor
-    var boeingStatus = 0; //  0:not ready(RED), 1:partially ready or warning(YELLOW), 2: fully ready(GREEN)
+    var boeingStatus = 2; //  0:not ready(RED), 1:partially ready or warning(YELLOW), 2: fully ready(GREEN)
     var boeingStatusMessage = "uninitialized";
 
     var mcp3008  = [[-1,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1,-1,-1]];
@@ -88,14 +88,17 @@
     ext.when_MCP3008changes = function( ch, dev ) {
         if ( typeof when_MCP3008changes.old == 'undefined' ) {
             when_MCP3008changes.old = [[-1,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1,-1,-1]];
+            mcp3008[dev][3]=1;
             return false;
         }
 
         if ( mcp3008[dev][ch] == -1 ) {
+            mcp3008[dev][3]=2;
             return false;
         }
 
         if ( when_MCP3008changes.old[dev][ch] == mcp3008[dev][ch] ) {
+            mcp3008[dev][3]=3;
             return false;
         }
 
@@ -107,7 +110,7 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['', 'v9', 'when_thrustLever'],
+            ['', 'v11', 'when_thrustLever'],
             ['r', 'read mcp3008 ch %m.mcp3008ch dev %m.spidev', 'getMCP3008', 0, 0],
             ['', 'revert mcp3008 ch %m.mcp3008ch dev %m.spidev', 'revertMCP3008', 0, 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch dev %m.spidev changes', 'when_MCP3008changes', 0, 0],
