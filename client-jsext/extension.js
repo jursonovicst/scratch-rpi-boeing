@@ -17,6 +17,7 @@
     var boeingStatusMessage = "uninitialized";
 
     var thrust_levers  = [-1, -1];
+    var revertThrustLevers  = [0, 0];
 
 
     // Cleanup function when the extension is unloaded
@@ -55,9 +56,9 @@
                     var sensor = elements[0].split('/');
 
                     if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 0))
-                        thrust_levers[0] = Number(elements[1]) / 1024;
+                        thrust_levers[0] = Math.abs(revertThrustLevers - Number(elements[1])) / 1023;
                     if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 1))
-                        thrust_levers[1] = Number(elements[1]) / 1024;
+                        thrust_levers[1] = Math.abs(revertThrustLevers - Number(elements[1])) / 1023;
                 }
             },
             error: function( jqXHR, textStatus, errorThrown ) {
@@ -82,6 +83,10 @@
         return thrust_levers[lever_no];
     }
 
+    ext.revertThrustLever = function( lever_no ) {
+        revertThrustLevers[lever_no] = 1023;
+    }
+
     ext.when_thrustLever = function(lever_no) {
 
         if ( typeof ext.when_thrustLever.thrust_levers == 'undefined' || thrust_levers[lever_no] == -1) {
@@ -103,6 +108,7 @@
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
             ['r', 'read thrust lever %m.thrustlever', 'getThrustLever', 0],
+            [' ', 'revert thrust lever %m.thrustlever', 'revertThrustLever', 0],
             ['h', 'when thrust lever %m.thrustlever changes', 'when_thrustLever', 0],
         ],
         menus: {
