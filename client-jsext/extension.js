@@ -56,9 +56,9 @@
                     var sensor = elements[0].split('/');
 
                     if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 0))
-                        thrust_levers[0] = Math.abs(revertThrustLevers - Number(elements[1])) / 1023;
+                        thrust_levers[0] = Math.abs(revertThrustLevers[0] - Number(elements[1])) / 1023;
                     if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 1))
-                        thrust_levers[1] = Math.abs(revertThrustLevers - Number(elements[1])) / 1023;
+                        thrust_levers[1] = Math.abs(revertThrustLevers[1] - Number(elements[1])) / 1023;
                 }
             },
             error: function( jqXHR, textStatus, errorThrown ) {
@@ -108,7 +108,7 @@
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
             ['r', 'read thrust lever %m.thrustlever', 'getThrustLever', 0],
-            [' ', 'revert thrust lever %m.thrustlever', 'revertThrustLever', 0],
+            ['', 'revert thrust lever %m.thrustlever', 'revertThrustLever', 0],
             ['h', 'when thrust lever %m.thrustlever changes', 'when_thrustLever', 0],
         ],
         menus: {
