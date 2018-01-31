@@ -98,4 +98,7 @@
     // Register the extension
     ScratchExtensions.register('Boeing extension', descriptor, ext);
 
+    //Start polling
+    ext._poll();
+
 })({});
