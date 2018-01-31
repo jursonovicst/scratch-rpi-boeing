@@ -19,7 +19,7 @@ def MakeHandlerClass(mcp):
                 buff += "OK"
 
             if self.path == "/poll":
-                for ch, value in self._mcp[0].getValues():
+                for ch, value in self._mcp['0'].getValues():
                     buff += "mcp3008/%d/%d %d\n" % (0, ch, value)
 
             m = re.match("/mcp3008/([0-1])/([0-7])", self.path)
