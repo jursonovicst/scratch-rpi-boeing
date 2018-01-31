@@ -72,7 +72,7 @@
 
     ext._poll = function() {
         if ( boeingStatus != 0) {
-            ext._readData();
+            ext._readData("/poll");
         }
         setTimeout(ext._poll, pollInterval);
     }
@@ -98,6 +98,4 @@
     // Register the extension
     ScratchExtensions.register('Boeing extension', descriptor, ext);
 
-    // start polling sensors
-    setTimeout(ext._poll, pollInterval);
 })({});
