@@ -82,11 +82,28 @@
         return thrust_levers[lever_no];
     }
 
+    ext.when_thrustLever = function(lever_no) {
+
+        if (ext.when_thrustLever.thrust_levers == 'undefined' || thrust_levers[lever_no] == -1) {
+            ext.when_thrustLever.thrust_levers = [thrust_levers[0], thrust_levers[1]];
+            return false;
+        }
+
+        if ( thrust_levers[lever_no] != ext.when_thrustLever.thrust_levers[lever_no]) {
+            ext.when_thrustLever.thrust_levers = [thrust_levers[0], thrust_levers[1]];
+            return true;
+        }
+
+        ext.when_thrustLever.thrust_levers = [thrust_levers[0], thrust_levers[1]];
+        return false;
+    };
+
     // Block and block menu descriptions
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
             ['r', 'read thrust lever %m.thrustlever', 'getThrustLever', 0],
+            ['h', 'when thrust lever %m.thrustlever changes', 'when_thrustLever', 0],
         ],
         menus: {
             thrustlever: ['0','1'],
