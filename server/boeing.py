@@ -7,10 +7,10 @@ import re
 
 def MakeHandlerClass(mcp):
     class CustomHandler(BaseHTTPRequestHandler, object):
-        _mcp = []
+        _mcp = {}
 
         def __init__(self, *args, **kwargs):
-             self._mcp[0] = mcp
+             self._mcp['0'] = mcp
              super(CustomHandler, self).__init__(*args, **kwargs)
 
         def do_GET(self):
@@ -24,7 +24,7 @@ def MakeHandlerClass(mcp):
 
             m = re.match("/mcp3008/([0-1])/([0-7])", self.path)
             if m is not None:
-                buff += "mcp3008/%d/%d %d\n" % (m.group(1), m.group(2), self._mcp[m.group(1)].getValue(m.group(2)))
+                buff += ("mcp3008/%s/%s %d\n" % (m.group(1), m.group(2), self._mcp[m.group(1)].getValue(int(m.group(2)))))
 
 
             self.send_response(200)
