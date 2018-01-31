@@ -84,7 +84,7 @@
 
     ext.when_thrustLever = function(lever_no) {
 
-        if (ext.when_thrustLever.thrust_levers == 'undefined' || thrust_levers[lever_no] == -1) {
+        if ( typeof ext.when_thrustLever.thrust_levers == 'undefined' || thrust_levers[lever_no] == -1) {
             ext.when_thrustLever.thrust_levers = [thrust_levers[0], thrust_levers[1]];
             return false;
         }
