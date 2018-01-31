@@ -13,8 +13,7 @@
     var boeingStatus = 0; //  0:not ready(RED), 1:partially ready or warning(YELLOW), 2: fully ready(GREEN)
     var boeingStatusMessage = "uninitialized";
 
-    // mcp IC
-    var mcp3008DataArray = [-1,-1,-1,-1,-1,-1,-1,-1];
+    var thrust_levers  = [-1, -1];
 
 
     // Cleanup function when the extension is unloaded
@@ -50,12 +49,13 @@
                 var lines = data.split('\n');
                 for(var i = 0;i < lines.length;i++){
                     var elements = lines[i].split(' ');
-                    var params = elements[0].split('/');
-                    var ch = Number(params[2]);
-                    var value = Number(elements[1]);
-                    mcp3008DataArray[ch] = value;
-                }
+                    var sensor = elements[0].split('/');
 
+                    if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 0))
+                        thrust_levers[0] = Number(elements[1]) / 1024;
+                    if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 0))
+                        thrust_levers[1] = Number(elements[1]) / 1024;
+                }
             },
             error: function( jqXHR, textStatus, errorThrown ) {
                 boeingStatus = 1;
@@ -64,10 +64,10 @@
         });
     }
 
-    ext.mcp3008getValue = function(spidev, ch) {
+    ext.getThrustLever = function( lever_no ) {
         ext._poll();
-        return mcp3008DataArray[ch];
-    };
+        return thrust_levers[lever_no];
+    }
 
     ext.when_mcp3008changes = function(spidev, ch) {
         if (mcp3008ch[ch] == -1) {
@@ -87,12 +87,10 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['r', 'read mcp3008 on SPI %m.spidev ch %m.mcp3008ch', 'mcp3008getValue', 0, 0],
-            ['h', 'when mcp3008 on SPI %m.spidev ch %m.mcp3008ch changes', 'when_mcp3008changes', 0, 0]
+            ['r', 'read thrust lever %m.thrustlever', 'getThrustLever', 0],
         ],
         menus: {
-            spidev: ['0','1'],
-            mcp3008ch: ['0', '1', '2', '3', '4', '5', '6', '7']
+            thrustlever: ['0','1'],
         },
         url: 'http://info.scratch.mit.edu/WeDo',
         displayName: 'Boeing'
