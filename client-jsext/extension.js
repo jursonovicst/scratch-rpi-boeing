@@ -78,7 +78,7 @@
     }
 
     ext.getThrustLever = function( lever_no ) {
-        ext._readData("mcp3008/0/" + lever_no);
+        ext._readData("/mcp3008/0/" + lever_no);
         return thrust_levers[lever_no];
     }
 
