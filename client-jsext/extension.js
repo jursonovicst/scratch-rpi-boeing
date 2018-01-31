@@ -45,7 +45,7 @@
     };
 
     ext._poll = function() {
-        if ( boeingStatus == 0) {
+        if ( boeingStatus != 0) {
             $.ajax({
                 url: boeingAccessURL + '/poll',
                 dataType: 'text',
