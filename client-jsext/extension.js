@@ -24,7 +24,7 @@
     // Use this to report missing hardware, plugin or unsupported browser
     ext._getStatus = function() {
         $.ajax({
-            url: 'http://127.0.0.1:8000/status',
+            url: 'http://10.157.118.45:8000/status',
             dataType: 'text',
             success: function( status_message ) {
                 boeingStatus = 2;
