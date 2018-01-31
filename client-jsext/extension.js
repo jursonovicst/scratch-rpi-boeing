@@ -86,18 +86,19 @@
     }
 
     ext.when_MCP3008changes = function( ch, dev ) {
+        if ( typeof when_MCP3008changes.mcp3008 == 'undefined' ) {
+            when_MCP3008changes.mcp3008 = [[-1,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1,-1,-1]];
+        }
 
-        if ( typeof ext.when_MCP3008changes.mcp3008[dev][ch] == 'undefined' || ext.mcp3008[dev][ch] == -1) {
-            ext.when_MCP3008changes.mcp3008[dev][ch] = ext.mcp3008[dev][ch];
+        if ( ext.mcp3008[dev][ch] == -1 ) {
             return false;
         }
 
-        if ( ext.when_MCP3008changes.mcp3008[dev][ch] != ext.mcp3008[dev][ch] ) {
-            ext.when_MCP3008changes.mcp3008[dev][ch] = ext.mcp3008[dev][ch];
+        if ( when_MCP3008changes.mcp3008[dev][ch] != ext.mcp3008[dev][ch] ) {
+            when_MCP3008changes.mcp3008[dev][ch] = ext.mcp3008[dev][ch];
             return true;
         }
 
-        ext.when_MCP3008changes.mcp3008[dev][ch] = ext.mcp3008[dev][ch];
         return false;
     };
 
@@ -105,7 +106,7 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['', 'v7', 'when_thrustLever'],
+            ['', 'v8', 'when_thrustLever'],
             ['r', 'read mcp3008 ch %m.mcp3008ch dev %m.spidev', 'getMCP3008', 0, 0],
             ['', 'revert mcp3008 ch %m.mcp3008ch dev %m.spidev', 'revertMCP3008', 0, 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch dev %m.spidev changes', 'when_MCP3008changes', 0, 0],
