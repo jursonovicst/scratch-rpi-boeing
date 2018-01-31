@@ -46,7 +46,7 @@
     ext.connectBoeing = function(callback) {
         var timeoutID; // need to set a timeout when a socket is created because we are using a 'wait' block
 
-        webSocket = new WebSocket('ws://127.0.0.1:8000');
+        webSocket = new WebSocket('ws://10.157.118.45:8000');
 
         // start the timer for a server reply - we wait for up to 2 seconds for the reply
         timeoutID = window.setTimeout(noServerAlert, 2000);

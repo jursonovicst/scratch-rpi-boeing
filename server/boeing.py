@@ -2,7 +2,6 @@
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import signal
-import random
 import mcp3008
 
 def MakeHandlerClass(mcp):
@@ -26,8 +25,8 @@ def MakeHandlerClass(mcp):
             self.end_headers()
             self.wfile.write(buff)
 
-        def log_message(self, format, *args):
-            return
+#        def log_message(self, format, *args):
+#            return
 
     # def do_HEAD(self):
     #        self._set_headers()
@@ -57,7 +56,7 @@ if __name__ == "__main__":
     mcp = mcp3008.Mcp3008(0, 0)
 
     HandlerClass = MakeHandlerClass(mcp)
-    httpd = HTTPServer(("127.0.0.1", port), HandlerClass)
+    httpd = HTTPServer(("0.0.0.0", port), HandlerClass)
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)

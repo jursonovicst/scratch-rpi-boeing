@@ -7,10 +7,12 @@ class Mcp3008:
     _mcp = None
     def __init__(self, spiport, spidevice):
         # Hardware SPI configuration:
-        self._mcp = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(spiport, spidevice))
+        #self._mcp = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(spiport, spidevice))
+        pass
 
     def getValue(self, ch):
-        self._mcp.read_adc(ch)
+        #self._mcp.read_adc(ch)
+        return ch * 3
 
     def getValues(self):
         for ch in range(0,8):
