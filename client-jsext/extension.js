@@ -24,12 +24,16 @@
     // Use this to report missing hardware, plugin or unsupported browser
     ext._getStatus = function() {
         $.ajax({
-              url: 'http://127.0.0.1:8000/status',
-              dataType: 'text',
-              success: function( status_message ) {
-                  boeingStatus = 2;
-                  boeingStatusMessage = status_message;
-              }
+            url: 'http://127.0.0.1:8000/status',
+            dataType: 'text',
+            success: function( status_message ) {
+                boeingStatus = 2;
+                boeingStatusMessage = status_message;
+            },
+            error: function( jqXHR, textStatus, errorThrown ) {
+                boeingStatus = 0;
+                boeingStatusMessage = textStatus;
+            }
         });
         return {status: boeingStatus,
                 msg: boeingStatusMessage
