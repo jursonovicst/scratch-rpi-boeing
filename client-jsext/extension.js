@@ -2,7 +2,7 @@
     console.log('Beoing');
 
     // in milliseconds
-    var pollInterval = 30;
+    var pollInterval = 100;
 
     // 0 = no debug
     // 1 = low level debug
@@ -62,8 +62,10 @@
                     }
                 },
                 error: function( jqXHR, textStatus, errorThrown ) {
-                    boeingStatus = 1;
-                    boeingStatusMessage = textStatus;
+                    if ( boeingStatus == 2 ) {
+                        boeingStatus = 1;
+                        boeingStatusMessage = textStatus;
+                    }
                 }
             });
         }
