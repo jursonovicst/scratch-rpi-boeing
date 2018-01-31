@@ -1,6 +1,9 @@
 (function(ext) {
     console.log('Beoing');
 
+    // in milliseconds
+    var pollInterval = 30;
+
     // 0 = no debug
     // 1 = low level debug
     // 2 = high - open the floodgates
@@ -42,46 +45,34 @@
     };
 
     ext._poll = function() {
-        $.ajax({
-            url: boeingAccessURL + '/poll',
-            dataType: 'text',
-            success: function( data ) {
-                var lines = data.split('\n');
-                for(var i = 0;i < lines.length;i++){
-                    var elements = lines[i].split(' ');
-                    var sensor = elements[0].split('/');
+        if ( boeingStatus == 0) {
+            $.ajax({
+                url: boeingAccessURL + '/poll',
+                dataType: 'text',
+                success: function( data ) {
+                    var lines = data.split('\n');
+                    for(var i = 0;i < lines.length;i++){
+                        var elements = lines[i].split(' ');
+                        var sensor = elements[0].split('/');
 
-                    if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 0))
-                        thrust_levers[0] = Number(elements[1]) / 1024;
-                    if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 1))
-                        thrust_levers[1] = Number(elements[1]) / 1024;
+                        if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 0))
+                            thrust_levers[0] = Number(elements[1]) / 1024;
+                        if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 1))
+                            thrust_levers[1] = Number(elements[1]) / 1024;
+                    }
+                },
+                error: function( jqXHR, textStatus, errorThrown ) {
+                    boeingStatus = 1;
+                    boeingStatusMessage = textStatus;
                 }
-            },
-            error: function( jqXHR, textStatus, errorThrown ) {
-                boeingStatus = 1;
-                boeingStatusMessage = textStatus;
-            }
-        });
+            });
+        }
+        setTimeout(ext._poll, pollInterval);
     }
 
     ext.getThrustLever = function( lever_no ) {
-        ext._poll();
         return thrust_levers[lever_no];
     }
-
-    ext.when_mcp3008changes = function(spidev, ch) {
-        if (mcp3008ch[ch] == -1) {
-            mcp3008DataArray[ch] = mcp3008getValue(spidev, ch);
-            return false;
-        }
-
-        if (mcp3008ch[ch] == mcp3008values[ch]) {
-            return false;
-        }
-
-        mcp3008DataArray[ch] = mcp3008getValue(spidev, ch);
-        return true;
-    };
 
     // Block and block menu descriptions
     var descriptor = {
@@ -98,4 +89,7 @@
 
     // Register the extension
     ScratchExtensions.register('Boeing extension', descriptor, ext);
+
+    // start polling sensors
+    setTimeout(ext._poll, pollInterval);
 })({});
