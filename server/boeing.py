@@ -27,8 +27,8 @@ def MakeHandlerClass(mcp):
 
             self.wfile.write(buff)
 
-#        def log_message(self, format, *args):
-#            return
+        def log_message(self, format, *args):
+            return
 
     # def do_HEAD(self):
     #        self._set_headers()
