@@ -53,7 +53,7 @@
 
                     if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 0))
                         thrust_levers[0] = Number(elements[1]) / 1024;
-                    if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 0))
+                    if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 1))
                         thrust_levers[1] = Number(elements[1]) / 1024;
                 }
             },
