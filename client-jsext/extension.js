@@ -16,8 +16,8 @@
     var boeingStatus = 0; //  0:not ready(RED), 1:partially ready or warning(YELLOW), 2: fully ready(GREEN)
     var boeingStatusMessage = "uninitialized";
 
-    var thrust_levers  = [-1, -1];
-    var revertThrustLevers  = [0, 0];
+    var mcp3008  = [[-1,-1,-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1,-1,-1]];
+    var revertMcp3008  = [[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]];
 
 
     // Cleanup function when the extension is unloaded
@@ -54,11 +54,9 @@
                 for(var i = 0;i < lines.length;i++){
                     var elements = lines[i].split(' ');
                     var sensor = elements[0].split('/');
-
-                    if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 0))
-                        thrust_levers[0] = Math.abs(revertThrustLevers[0] - Number(elements[1])) / 1023;
-                    if ( sensor[0] == "mcp3008" && Number(sensor[1]) == 0 && Number(sensor[2] == 1))
-                        thrust_levers[1] = Math.abs(revertThrustLevers[1] - Number(elements[1])) / 1023;
+                    if( sensor[0] == "mcp3008" && 0 <= Number(sensor[1] && Number(sensor[1] <= 1 && 0 <= Number(sensor[2] && Number(sensor[2] <= 7 ) {
+                        mcp3008[Number(sensor[1]][Number(sensor[2]] = Number(elements[1]);
+                    }
                 }
             },
             error: function( jqXHR, textStatus, errorThrown ) {
@@ -78,28 +76,28 @@
         setTimeout(ext._poll, pollInterval);
     }
 
-    ext.getThrustLever = function( lever_no ) {
-        ext._readData("/mcp3008/0/" + lever_no);
-        return thrust_levers[lever_no];
+    ext.getMCP3008 = function( ch, dev ) {
+        ext._readData("/mcp3008/" + dev + "/" + ch);
+        return mcp3008[dev][ch];
     }
 
-    ext.revertThrustLever = function( lever_no ) {
-        revertThrustLevers[lever_no] = 1023;
+    ext.revertMCP3008 = function( ch, dev ) {
+        revertMcp3008[dev][ch] = 1023;
     }
 
-    ext.when_thrustLever = function(lever_no) {
+    ext.when_MCP3008changes = function( ch, dev ) {
 
-        if ( typeof ext.when_thrustLever.thrust_levers == 'undefined' || thrust_levers[lever_no] == -1) {
-            ext.when_thrustLever.thrust_levers = [thrust_levers[0], thrust_levers[1]];
+        if ( typeof ext.when_MCP3008changes.mcp3008[dev][ch] == 'undefined' || mcp3008[dev][ch] == -1) {
+            ext.when_MCP3008changes.mcp3008[dev][ch] = mcp3008[dev][ch];
             return false;
         }
 
-        if ( thrust_levers[lever_no] != ext.when_thrustLever.thrust_levers[lever_no]) {
-            ext.when_thrustLever.thrust_levers = [thrust_levers[0], thrust_levers[1]];
+        if ( mcp3008[dev][ch] != ext.when_MCP3008changes.mcp3008[dev][ch]) {
+            ext.when_MCP3008changes.mcp3008[dev][ch] = mcp3008[dev][ch];
             return true;
         }
 
-        ext.when_thrustLever.thrust_levers = [thrust_levers[0], thrust_levers[1]];
+        ext.when_MCP3008changes.mcp3008[dev][ch] = mcp3008[dev][ch];
         return false;
     };
 
@@ -107,13 +105,15 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['', '1', 'when_thrustLever'],
-            ['r', 'read thrust lever %m.thrustlever', 'getThrustLever', 0],
-            ['', 'revert thrust lever %m.thrustlever', 'revertThrustLever', 0],
-            ['h', 'when thrust lever %m.thrustlever changes', 'when_thrustLever', 0],
+            ['', '2', 'when_thrustLever'],
+            ['r', 'read mcp3008 ch %m.mcp3008ch dev %m.spidev', 'getMCP3008', 0, 0],
+            ['', 'revert mcp3008 ch %m.mcp3008ch dev %m.spidev', 'revertMCP3008', 0, 0],
+            ['h', 'when mcp3008 ch %m.mcp3008ch dev %m.spidev changes', 'when_MCP3008changes', 0, 0],
         ],
         menus: {
             thrustlever: ['0','1'],
+            mcp3008ch: ['0','1','2','3','4','5','6','7'],
+            spidev: ['0','1'],
         },
         url: 'http://info.scratch.mit.edu/WeDo',
         displayName: 'Boeing'
