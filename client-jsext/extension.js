@@ -55,7 +55,7 @@
                     var elements = lines[i].split(' ');
                     var sensor = elements[0].split('/');
                     if( sensor[0] == "mcp3008" && 0 <= Number(sensor[1]) && Number(sensor[1]) <= 1 && 0 <= Number(sensor[2]) && Number(sensor[2]) <= 7 ) {
-                        mcp3008[Number(sensor[1])][Number(sensor[2])] = Number(elements[1]);
+                        mcp3008[Number(sensor[1])][Number(sensor[2])] = Math.abs(revertMcp3008[Number(sensor[1])][Number(sensor[2])] - Number(elements[1]));
                     }
                 }
             },
@@ -92,7 +92,7 @@
             return false;
         }
 
-        if ( mcp3008[dev][ch] != ext.when_MCP3008changes.mcp3008[dev][ch]) {
+        if ( ext.when_MCP3008changes.mcp3008[dev][ch] != mcp3008[dev][ch] ) {
             ext.when_MCP3008changes.mcp3008[dev][ch] = mcp3008[dev][ch];
             return true;
         }
@@ -105,7 +105,7 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['', '3', 'when_thrustLever'],
+            ['', '4', 'when_thrustLever'],
             ['r', 'read mcp3008 ch %m.mcp3008ch dev %m.spidev', 'getMCP3008', 0, 0],
             ['', 'revert mcp3008 ch %m.mcp3008ch dev %m.spidev', 'revertMCP3008', 0, 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch dev %m.spidev changes', 'when_MCP3008changes', 0, 0],
