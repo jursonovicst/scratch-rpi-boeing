@@ -18,6 +18,8 @@ def MakeHandlerClass(mcp):
             if self.path == "/poll":
                 for ch, value in self._mcp.getValues():
                     buff += "mcp3008/%d/%d %d\n" % (0, ch, value)
+            elif self.path == "/status":
+                buff += "OK"
 
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
