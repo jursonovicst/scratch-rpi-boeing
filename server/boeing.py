@@ -3,14 +3,16 @@
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import signal
 import mcp3008
+import gpio
 import re
 
-def MakeHandlerClass(mcp):
+def MakeHandlerClass(mcp, gpio):
     class CustomHandler(BaseHTTPRequestHandler, object):
         _mcp = {}
 
         def __init__(self, *args, **kwargs):
              self._mcp['0'] = mcp
+             self._gpio = gpio
              super(CustomHandler, self).__init__(*args, **kwargs)
 
         def do_GET(self):
@@ -21,11 +23,17 @@ def MakeHandlerClass(mcp):
             if self.path == "/poll":
                 for ch, value in self._mcp['0'].getValues():
                     buff += "mcp3008/%d/%d %d\n" % (0, ch, value)
+                for port, value in self._gpio.getValues():
+                    buff += "gpio/%d %d\n" % (port, value)
 
             m = re.match("/mcp3008/([0-1])/([0-7])", self.path)
             if m is not None:
                 buff += ("mcp3008/%s/%s %d\n" % (m.group(1), m.group(2), self._mcp[m.group(1)].getValue(int(m.group(2)))))
 
+            # Commands
+            m = re.match("/setupGpio/([0-9]+)/([0-9])", self.path)
+            if m is not None and 1 <= int(m.group(1)) and int(m.group(1)) <= 26:
+                self._gpio.setup(int(m.group(1)), int(m.group(2)))
 
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
@@ -63,8 +71,9 @@ if __name__ == "__main__":
     port = 8000
 
     mcp = mcp3008.Mcp3008(0, 0)
+    gpio = gpio.Gpio()
 
-    HandlerClass = MakeHandlerClass(mcp)
+    HandlerClass = MakeHandlerClass(mcp, gpio)
     httpd = HTTPServer(("0.0.0.0", port), HandlerClass)
 
     signal.signal(signal.SIGINT, signal_handler)
