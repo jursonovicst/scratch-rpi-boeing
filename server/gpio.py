@@ -13,7 +13,7 @@ class Gpio:
 
     def __init__(self):
         # Hardware SPI configuration:
-        RPi.GPIO.setmode(RPi.GPIO.BOARD)
+        RPi.GPIO.setmode(RPi.GPIO.BCM)
         self._ports = []
 
     def setup(self, port, mode):
