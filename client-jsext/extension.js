@@ -100,19 +100,36 @@
         return true;
     };
 
+    ext.initGPIO = function( port, gpioDefault ) {
+    }
+
+    ext.isGPIOHigh = function( port ) {
+        return false;
+    }
+
+    ext.when_GPIOChanges = function( port, transition ) {
+        return false;
+    }
+
     // Block and block menu descriptions
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['', 'v15', 'when_thrustLever'],
+            ['', 'v16', 'when_thrustLever'],
             ['r', 'read mcp3008 ch %m.mcp3008ch dev %m.spidev', 'getMCP3008', 0, 0],
             ['', 'revert mcp3008 ch %m.mcp3008ch dev %m.spidev', 'revertMCP3008', 0, 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch dev %m.spidev changes', 'when_MCP3008changes', 0, 0],
+
+            ['', 'set GPIO %d to %m.gpiodefault', 'initGPIO', 0, 'pull-down'],
+            ['b', 'is GPIO %d low', 'isGPIOHigh', 0],
+            ['h', 'when GPIO %d %m.transition', 'when_GPIOChanges', 0, 'rising'],
         ],
         menus: {
             thrustlever: ['0','1'],
             mcp3008ch: ['0','1','2','3','4','5','6','7'],
             spidev: ['0','1'],
+            transition: ['falling', 'rising'],
+            gpiodefault: ['pull-up', 'pull-down', 'input'],
         },
         url: 'http://info.scratch.mit.edu/WeDo',
         displayName: 'Boeing'
