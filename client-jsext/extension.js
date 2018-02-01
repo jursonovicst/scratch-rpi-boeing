@@ -57,7 +57,7 @@
         if ( boeingStatus != 0) {
 
             $.ajax({
-                url: boeingAccessURL + path,
+                url: boeingAccessURL + "/poll",
                 dataType: 'text',
                 success: function( data ) {
                     var lines = data.split('\n');
@@ -136,16 +136,49 @@
     ext.initGPIO = function( port, gpioDefault ) {
         switch( gpioDefault ) {
             case 'd-out':
-                // TODO: command
-                gpioMode[ port ] = gpioModeDOut;
+                $.ajax({
+                    url: boeingAccessURL + "/setupGpio/" + port + "/" + gpioModeDOut,
+                    dataType: 'text',
+                    success: function( data ) {
+                        gpioMode[ port ] = gpioModePullUp;
+                    }
+                    error: function( jqXHR, textStatus, errorThrown ) {
+                        if ( boeingStatus == 2 ) {
+                            boeingStatus = 1;
+                            boeingStatusMessage = textStatus;
+                        }
+                    }
+                });
                 break;
             case 'pull-up':
-                // TODO: command
-                gpioMode[ port ] = gpioModePullUp;
+                $.ajax({
+                    url: boeingAccessURL + "/setupGpio/" + port + "/" + gpioModePullUp,
+                    dataType: 'text',
+                    success: function( data ) {
+                        gpioMode[ port ] = gpioModePullUp;
+                    }
+                    error: function( jqXHR, textStatus, errorThrown ) {
+                        if ( boeingStatus == 2 ) {
+                            boeingStatus = 1;
+                            boeingStatusMessage = textStatus;
+                        }
+                    }
+                });
                 break;
             case 'pull-down':
-                // TODO: command
-                gpioMode[ port ] = gpioModePullDown;
+                $.ajax({
+                    url: boeingAccessURL + "/setupGpio/" + port + "/" + gpioModePullDown,
+                    dataType: 'text',
+                    success: function( data ) {
+                        gpioMode[ port ] = gpioModePullUp;
+                    }
+                    error: function( jqXHR, textStatus, errorThrown ) {
+                        if ( boeingStatus == 2 ) {
+                            boeingStatus = 1;
+                            boeingStatusMessage = textStatus;
+                        }
+                    }
+                });
                 break;
             default:
                 gpioMode[ port ] = gpioModeUnknown;
@@ -155,7 +188,7 @@
     // Set digital value
     ext.setGPIO = function( gpiostate, port ) {
         if( gpioMode[port] == gpioModeDOut) {
-            // TODO: command
+            #TODO: command
         }
     }
 
@@ -201,7 +234,7 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['', 'v19', 'isGPIOHigh'],
+            ['', 'v20', 'isGPIOHigh'],
             ['r', 'mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'getMCP3008', 0, 0],
             ['', 'revert mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'revertMCP3008', 0, 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch SPI %m.spidev changes', 'when_MCP3008changes', 0, 0],
