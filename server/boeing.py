@@ -30,6 +30,10 @@ def MakeHandlerClass(mcp, gpio):
             if m is not None:
                 buff += ("mcp3008/%s/%s %d\n" % (m.group(1), m.group(2), self._mcp[m.group(1)].getValue(int(m.group(2)))))
 
+            m = re.match("/gpio/([0-9]+)", self.path)
+            if m is not None:
+                buff += ("gpio/%d %d\n" % (int(m.group(1)), self._gpio.getValue(int(m.group(1)))) )
+
             # Commands
             m = re.match("/setupGpio/([0-9]+)/([0-9])", self.path)
             if m is not None and 1 <= int(m.group(1)) and int(m.group(1)) <= 26:

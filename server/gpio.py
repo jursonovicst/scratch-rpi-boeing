@@ -42,8 +42,6 @@ class Gpio:
         for port in self._ports:
             if ( RPi.GPIO.gpio_function(port) == RPi.GPIO.IN ):
                 yield (port, self.gpioHigh if RPi.GPIO.input(port) == RPi.GPIO.HIGH else self.gpioLow)
-            else:
-                yield (port, self.gpioUnknown)
 
     def __del__(self):
         RPi.GPIO.cleanup(self._ports)
