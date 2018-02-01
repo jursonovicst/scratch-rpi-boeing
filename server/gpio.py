@@ -11,7 +11,7 @@ class Gpio:
     gpioLow = 0
     gpioUnknown = -1
 
-    def __init__(self, spiport, spidevice):
+    def __init__(self):
         # Hardware SPI configuration:
         RPi.GPIO.setmode(RPi.GPIO.BOARD)
         self._ports = []
@@ -33,8 +33,10 @@ class Gpio:
                 self._ports.append(port)
 
     def getValue(self, port):
-        #self._mcp.read_adc(ch)
-        return port * 3
+        if port in self._ports and RPi.GPIO.gpio_function(port) == RPi.GPIO.IN:
+            return self.gpioHigh if RPi.GPIO.input(port) == RPi.GPIO.HIGH else self.gpioLow
+
+        return self.gpioUnknown
 
     def getValues(self):
         for port in self._ports:
@@ -42,6 +44,4 @@ class Gpio:
                 yield (port, self.gpioHigh if RPi.GPIO.input(port) == RPi.GPIO.HIGH else self.gpioLow)
 
     def __del__(self):
-        RPi.GPIO.cleanup(self._channellist)
-
-        pass
+        RPi.GPIO.cleanup(self._ports)
