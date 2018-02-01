@@ -119,14 +119,14 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['', 'v17', 'isGPIOHigh'],
+            ['', 'v18', 'isGPIOHigh'],
             ['r', 'read mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'getMCP3008', 0, 0],
             ['', 'revert mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'revertMCP3008', 0, 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch SPI %m.spidev changes', 'when_MCP3008changes', 0, 0],
 
             ['', 'init GPIO %d for %m.gpiodefault', 'initGPIO', 0, 'pull-down'],
-            ['', 'set %m.gpiostate on GPIO %d', 'setGPIO', 0, 'high'],
-            ['b', 'is GPIO %d low', 'isGPIOHigh', 0],
+            ['', 'set GPIO %d to %m.gpiostate', 'setGPIO', 0, 'high'],
+            ['b', 'is GPIO %d %m.gpiostate', 'isGPIOHigh', 0, 'low'],
             ['h', 'when GPIO %d %m.transition', 'when_GPIOChanges', 0, 'rising'],
         ],
         menus: {
