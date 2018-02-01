@@ -70,12 +70,9 @@
                                     mcp3008[Number(sensor[1])][Number(sensor[2])] = Math.round(Math.abs(mcp3008Revert[Number(sensor[1])][Number(sensor[2])] - Number(elements[1])) * 250 / 1023 ) / 250;
                                 }
                                 break;
-                            case 'gpio':        // gpio/<port>/<mode> <value>
-                                if( 0 <= Number(sensor[1]) && Number(sensor[1]) <= 26 ) {
-                                    gpioMode[Number(sensor[1])] = Number(sensor[2]);
-                                    if( Number(sensor[2]) == gpioModePullDown || Number(sensor[2]) == gpioModePullUp ) {
-                                        gpio[Number(sensor[1])] = Number(elements[1]);
-                                    }
+                            case 'gpio':        // gpio/<port> <value>
+                                if( 1 <= Number(sensor[1]) && Number(sensor[1]) <= 26 ) {
+                                    gpio[Number(sensor[1])] = Number(elements[1]);
                                 }
                                 break;
                         }
@@ -234,7 +231,7 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['', 'v22', 'isGPIOHigh'],
+            ['', 'v23', 'isGPIOHigh'],
             ['r', 'mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'getMCP3008', 0, 0],
             ['', 'revert mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'revertMCP3008', 0, 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch SPI %m.spidev changes', 'when_MCP3008changes', 0, 0],
