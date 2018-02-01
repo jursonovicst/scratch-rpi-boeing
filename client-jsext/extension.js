@@ -77,30 +77,34 @@
         setTimeout(ext._poll, pollInterval);
     }
 
-    ext.getMCP3008 = function( ch, dev ) {
-        ext._readData("/mcp3008/" + dev + "/" + ch);
-        return mcp3008[dev][ch];
+    ext.getMCP3008 = function( mcp3008ch, spidev ) {
+        ext._readData("/mcp3008/" + spidev + "/" + mcp3008ch);
+        return mcp3008[spidev][mcp3008ch];
     }
 
-    ext.revertMCP3008 = function( ch, dev ) {
-        mcp3008Revert[dev][ch] = 1023;
+    ext.revertMCP3008 = function( mcp3008ch, spidev ) {
+        mcp3008Revert[spidev][mcp3008ch] = 1023;
     }
 
-    ext.when_MCP3008changes = function( ch, dev ) {
-        if ( mcp3008Old[dev][ch] == mcp3008[dev][ch] ) {
+    ext.when_MCP3008changes = function( mcp3008ch, spidev ) {
+        if ( mcp3008Old[spidev][mcp3008ch] == mcp3008[spidev][mcp3008ch] ) {
             return false;
         }
 
-        if ( mcp3008[dev][ch] == -1 || mcp3008Old[dev][ch] == -1 ) {
-            mcp3008Old[dev][ch] = mcp3008[dev][ch];
+        if ( mcp3008[spidev][mcp3008ch] == -1 || mcp3008Old[spidev][mcp3008ch] == -1 ) {
+            mcp3008Old[spidev][mcp3008ch] = mcp3008[spidev][mcp3008ch];
             return false;
         }
 
-        mcp3008Old[dev][ch] = mcp3008[dev][ch];
+        mcp3008Old[spidev][mcp3008ch] = mcp3008[spidev][mcp3008ch];
         return true;
     };
 
     ext.initGPIO = function( port, gpioDefault ) {
+    }
+
+    ext.setGPIO = function( gpiostate, port ) {
+        return false;
     }
 
     ext.isGPIOHigh = function( port ) {
@@ -115,21 +119,22 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['', 'v16', 'when_thrustLever'],
-            ['r', 'read mcp3008 ch %m.mcp3008ch dev %m.spidev', 'getMCP3008', 0, 0],
-            ['', 'revert mcp3008 ch %m.mcp3008ch dev %m.spidev', 'revertMCP3008', 0, 0],
-            ['h', 'when mcp3008 ch %m.mcp3008ch dev %m.spidev changes', 'when_MCP3008changes', 0, 0],
+            ['', 'v17', 'isGPIOHigh'],
+            ['r', 'read mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'getMCP3008', 0, 0],
+            ['', 'revert mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'revertMCP3008', 0, 0],
+            ['h', 'when mcp3008 ch %m.mcp3008ch SPI %m.spidev changes', 'when_MCP3008changes', 0, 0],
 
-            ['', 'set GPIO %d to %m.gpiodefault', 'initGPIO', 0, 'pull-down'],
+            ['', 'init GPIO %d for %m.gpiodefault', 'initGPIO', 0, 'pull-down'],
+            ['', 'set %m.gpiostate on GPIO %d', 'setGPIO', 0, 'high'],
             ['b', 'is GPIO %d low', 'isGPIOHigh', 0],
             ['h', 'when GPIO %d %m.transition', 'when_GPIOChanges', 0, 'rising'],
         ],
         menus: {
-            thrustlever: ['0','1'],
             mcp3008ch: ['0','1','2','3','4','5','6','7'],
             spidev: ['0','1'],
             transition: ['falling', 'rising'],
-            gpiodefault: ['pull-up', 'pull-down', 'input'],
+            gpiodefault: ['pull-up', 'pull-down', 'd-out'],
+            gpiostate: ['high','low'],
         },
         url: 'http://info.scratch.mit.edu/WeDo',
         displayName: 'Boeing'
