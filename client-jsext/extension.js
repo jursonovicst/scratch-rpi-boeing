@@ -24,8 +24,8 @@
     var gpio = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
     var gpioLast = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
 
-    const gpioModeUnknown = -1, gpioModePullUp = 0, gpioModePullDown = 1, gpioModeDOut = 3;
-    var gpioMode = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
+    const gpioModeUnknown = 'unknown', gpioModePullUp = 'pull-up', gpioModePullDown = 'pull-down', gpioModeDOut = 'd-out';
+    var gpioMode = [gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown];
 
     // Cleanup function when the extension is unloaded
     ext._shutdown = function (
@@ -167,7 +167,7 @@
                     url: boeingAccessURL + "/setupGpio/" + port + "/" + gpioModePullDown,
                     dataType: 'text',
                     success: function( data ) {
-                        gpioMode[ port ] = gpioModePullUp;
+                        gpioMode[ port ] = gpioModePullDown;
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
                         if ( boeingStatus == 2 ) {
@@ -195,6 +195,14 @@
             if ( gpiostate == 'low' && gpio[port] == gpioLow || gpiostate == 'high' && gpio[port] == gpioHigh ) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    // Port mode
+    ext.isGPIOMode = function( port, gpioDefault ) {
+        if ( gpioMode[port] == gpioDefault ) {
+                return true;
         }
         return false;
     }
@@ -231,21 +239,22 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['', 'v23', 'isGPIOHigh'],
+            ['', 'v24', 'isGPIOHigh'],
             ['r', 'mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'getMCP3008', 0, 0],
             ['', 'revert mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'revertMCP3008', 0, 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch SPI %m.spidev changes', 'when_MCP3008changes', 0, 0],
 
-            ['', 'init GPIO %d for %m.gpiodefault', 'initGPIO', 0, 'pull-down'],
+            ['', 'init GPIO %d for %m.gpiodefault', 'initGPIO', 0, gpioModePullDown],
             ['', 'set GPIO %d %m.gpiostate', 'setGPIO', 0, 'high'],
             ['b', 'GPIO %d %m.gpiostate?', 'isGPIO', 0, 'low'],
+            ['b', 'GPIO %d %m.gpiodefault?', 'isGPIOMode', 0, gpioModePullDown],
             ['h', 'when GPIO %d %m.transition', 'when_GPIOChanges', 0, 'rises'],
         ],
         menus: {
             mcp3008ch: ['0','1','2','3','4','5','6','7'],
             spidev: ['0','1'],
             transition: ['falls', 'rises'],
-            gpiodefault: ['pull-up', 'pull-down', 'd-out'],
+            gpiodefault: [gpioModeDOut, gpioModePullDown, gpioModePullUp],
             gpiostate: ['high','low'],
         },
         url: 'http://info.scratch.mit.edu/WeDo',

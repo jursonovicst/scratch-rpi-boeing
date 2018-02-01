@@ -2,10 +2,10 @@ import RPi.GPIO
 
 
 class Gpio:
-    gpioModeUnknown = -1
-    gpioModePullUp = 0
-    gpioModePullDown = 1
-    gpioModeDOut = 3
+    gpioModeUnknown = 'unknown'
+    gpioModePullUp = 'pull-up'
+    gpioModePullDown = 'pull-down'
+    gpioModeDOut = 'd-out'
 
     gpioHigh = 1
     gpioLow = 0

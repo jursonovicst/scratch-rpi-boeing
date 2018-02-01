@@ -35,9 +35,9 @@ def MakeHandlerClass(mcp, gpio):
                 buff += ("gpio/%d %d\n" % (int(m.group(1)), self._gpio.getValue(int(m.group(1)))) )
 
             # Commands
-            m = re.match("/setupGpio/([0-9]+)/([0-9])", self.path)
+            m = re.match("/setupGpio/([0-9]+)/([a-zA-Z0-9_-]+)", self.path)
             if m is not None and 1 <= int(m.group(1)) and int(m.group(1)) <= 26:
-                self._gpio.setup(int(m.group(1)), int(m.group(2)))
+                self._gpio.setup(int(m.group(1)), m.group(2))
 
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
