@@ -4,9 +4,9 @@ import Adafruit_MCP3008
 
 
 class Mcp3008:
-    _mcp = None
     def __init__(self, spiport, spidevice):
         # Hardware SPI configuration:
+        #TODO: use try to catch invalid ports
         self._mcp = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(spiport, spidevice))
         self._spidev = spidevice
 
@@ -14,12 +14,10 @@ class Mcp3008:
         return self._spidev
 
     def getValue(self, ch):
+        #TODO: use try to catch invalid ports
         self._mcp.read_adc(ch)
 
     def getValues(self):
+        #TODO: use try to catch invalid ports
         for ch in range(0,8):
             yield (ch, self._mcp.read_adc(ch))
-
-
-    def __del__(self):
-        pass

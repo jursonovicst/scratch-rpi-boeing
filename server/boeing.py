@@ -18,6 +18,8 @@ def MakeHandlerClass(mcp, gpio):
             buff = ""
             retcode = 500
 
+            #TODO: use try to handle error
+
             # Status
             if self.path == "/status":
                 buff += "OK"
@@ -33,26 +35,26 @@ def MakeHandlerClass(mcp, gpio):
                 retcode = 200
 
             # get specific mcp's value
-            m = re.match("/mcp3008/([0-1])/([0-7])", self.path)
+            m = re.match("/mcp3008/(\d+)/(\d+)", self.path)
             if m is not None:
                 buff += ("mcp3008/%s/%s %d\n" % (m.group(1), m.group(2), self._mcps[int(m.group(1))].getValue(int(m.group(2)))))
                 retcode = 200
 
             # get specific gpio value
-            m = re.match("/gpio/([0-9]+)", self.path)
+            m = re.match("/gpio/(\d+)", self.path)
             if m is not None:
                 buff += ("gpio/%d %s\n" % (int(m.group(1)), self._gpio.getValue(int(m.group(1)))) )
                 retcode = 200
 
             # init gpio port
-            m = re.match("/setupGpio/([0-9]+)/([a-zA-Z0-9_-]+)", self.path)
-            if m is not None and 1 <= int(m.group(1)) and int(m.group(1)) <= 26:
+            m = re.match("/setupGpio/(\d+)/([a-zA-Z0-9_-]+)", self.path)
+            if m is not None:
                 self._gpio.setup(int(m.group(1)), m.group(2))
                 retcode = 200
 
             # set gpio port
-            m = re.match("/setGpio/([0-9]+)/(%s|%s)" % (gpio.Gpio.gpioHigh, gpio.Gpio.gpioLow), self.path)
-            if m is not None and 1 <= int(m.group(1)) and int(m.group(1)) <= 26:
+            m = re.match("/setGpio/(\d+)/(%s|%s)" % (gpio.Gpio.gpioHigh, gpio.Gpio.gpioLow), self.path)
+            if m is not None:
                 self._gpio.setup(int(m.group(1)), m.group(2))
                 retcode = 200
 
@@ -63,16 +65,10 @@ def MakeHandlerClass(mcp, gpio):
 
             self.wfile.write(buff)
 
-#        def log_message(self, format, *args):
-#            return
-
-    # def do_HEAD(self):
-    #        self._set_headers()
-
-    #    def do_POST(self):
-    #        # Doesn't do anything with posted data
-    #        self._set_headers()
-    #        self.wfile.write("<html><body><h1>POST!</h1></body></html>")
+        def log_message(self, format, *args):
+            #TODO: filter poll
+            super(CustomHandler, self).log_message(format, *args)
+            return
 
     return CustomHandler
 
@@ -100,7 +96,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
-    print "Serving at port", port
+    print "Listening on 0.0.0.0:%d..." % port
     httpd.serve_forever()
 
     httpd.server_close()
