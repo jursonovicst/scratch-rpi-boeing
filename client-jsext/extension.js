@@ -21,7 +21,7 @@
     var mcp3008Revert  = [[]];
 
 
-    const gpioHigh = 'high', gpioLow = 'low', gpioUnknown = 'unknown';
+    const GPIOHIGH = 'high', GPIOLOW = 'low', GPIOUNKNOWN = 'unknown';
 
     // named array indexed by port string to store actual GPIO values (both for input and output ports)
     var gpio = [];
@@ -30,7 +30,7 @@
     var gpioLast = [];
 
 
-    const gpioModeUnknown = 'unknown', gpioModePullUp = 'pull-up', gpioModePullDown = 'pull-down', gpioModeDOut = 'd-out';
+    const GPIOMODEUNKNOWN = 'unknown', GPIOMODEPULLUP = 'pull-up', GPIOMODEPULLDOWN = 'pull-down', GPIOMODEPULLDOUT = 'd-out';
 
     // named array indexed by port string to store GPIO port modes (pull-up/down, dout)
     var gpioMode = [];
@@ -139,10 +139,10 @@
         switch( gpioDefault ) {
             case 'd-out':
                 $.ajax({
-                    url: boeingAccessURL + "/setupGpio/" + port + "/" + gpioModeDOut,
+                    url: boeingAccessURL + "/setupGpio/" + port + "/" + GPIOMODEPULLDOUT,
                     dataType: 'text',
                     success: function( data ) {
-                        gpioMode[ port.toString() ] = gpioModeDOut;
+                        gpioMode[ port.toString() ] = GPIOMODEPULLDOUT;
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
                         if ( boeingStatus == 2 ) {
@@ -154,10 +154,10 @@
                 break;
             case 'pull-up':
                 $.ajax({
-                    url: boeingAccessURL + "/setupGpio/" + port + "/" + gpioModePullUp,
+                    url: boeingAccessURL + "/setupGpio/" + port + "/" + GPIOMODEPULLUP,
                     dataType: 'text',
                     success: function( data ) {
-                        gpioMode[ port.toString() ] = gpioModePullUp;
+                        gpioMode[ port.toString() ] = GPIOMODEPULLUP;
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
                         if ( boeingStatus == 2 ) {
@@ -169,10 +169,10 @@
                 break;
             case 'pull-down':
                 $.ajax({
-                    url: boeingAccessURL + "/setupGpio/" + port + "/" + gpioModePullDown,
+                    url: boeingAccessURL + "/setupGpio/" + port + "/" + GPIOMODEPULLDOWN,
                     dataType: 'text',
                     success: function( data ) {
-                        gpioMode[ port.toString() ] = gpioModePullDown;
+                        gpioMode[ port.toString() ] = GPIOMODEPULLDOWN;
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
                         if ( boeingStatus == 2 ) {
@@ -183,13 +183,13 @@
                 });
                 break;
             default:
-                gpioMode[ port.toString() ] = gpioModeUnknown;
+                gpioMode[ port.toString() ] = GPIOMODEUNKNOWN;
         }
     }
 
     // Set digital value
     ext.setGPIO = function( gpiostate, port ) {
-        if( gpioMode[port.toString()] == gpioModeDOut) {
+        if( gpioMode[port.toString()] == GPIOMODEPULLDOUT) {
             $.ajax({
                 url: boeingAccessURL + "/setGpio/" + port + "/" + gpiostate,
                 dataType: 'text',
@@ -206,8 +206,8 @@
     // Read digital value
     ext.isGPIO = function( _port, gpiostate ) {
         port = _port.toString();
-        if ( gpioMode[port] == gpioModePullUp || gpioMode[port] == gpioModePullDown) {
-            if ( gpiostate == 'low' && gpio[port] == gpioLow || gpiostate == 'high' && gpio[port] == gpioHigh ) {
+        if ( gpioMode[port] == GPIOMODEPULLUP || gpioMode[port] == GPIOMODEPULLDOWN) {
+            if ( gpiostate == 'low' && gpio[port] == GPIOLOW || gpiostate == 'high' && gpio[port] == GPIOHIGH ) {
                 return true;
             } else {
                 return false;
@@ -228,7 +228,7 @@
     ext.when_GPIOChanges = function( _port, transition ) {
         port = _port.toString();
 
-        if ( gpioMode[port] == gpioModeDOut || gpioMode[port] == gpioModeUnknown) {
+        if ( gpioMode[port] == GPIOMODEPULLDOUT || gpioMode[port] == GPIOMODEUNKNOWN) {
             return false;   // Not in input mode
         }
 
@@ -236,17 +236,17 @@
             return false;   // Not changed
         }
 
-        if ( gpio[port] == gpioUnknown || gpioLast[port] == gpioUnknown ) {
+        if ( gpio[port] == GPIOUNKNOWN || gpioLast[port] == GPIOUNKNOWN ) {
             gpioLast[port] = gpio[port];
             return false;   // In unknown state (at the beginning)
         }
 
-        if( transition == 'rises' && gpio[port] == gpioHigh && gpioLast[port] == gpioLow ) {
+        if( transition == 'rises' && gpio[port] == GPIOHIGH && gpioLast[port] == GPIOLOW ) {
             gpioLast[port] = gpio[port];
             return true;    // Low -> High
         }
 
-        if( transition == 'falls' && gpio[port] == gpioLow && gpioLast[port] == gpioHigh ) {
+        if( transition == 'falls' && gpio[port] == GPIOLOW && gpioLast[port] == GPIOHIGH ) {
             gpioLast[port] = gpio[port];
             return true;    // High -> Low
         }
@@ -263,18 +263,18 @@
             ['', 'revert mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'revertMCP3008', 0, 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch SPI %m.spidev changes', 'when_MCP3008changes', 0, 0],
 
-            ['', 'init GPIO %d for %m.gpiodefault', 'initGPIO', 0, gpioModePullDown],
+            ['', 'init GPIO %d for %m.gpiodefault', 'initGPIO', 0, GPIOMODEPULLDOWN],
             ['', 'set GPIO %d %m.gpiostate', 'setGPIO', 0, 'high'],
             ['b', 'GPIO %d %m.gpiostate?', 'isGPIO', 0, 'low'],
-            ['b', 'GPIO %d %m.gpiodefault?', 'isGPIOMode', 0, gpioModePullDown],
+            ['b', 'GPIO %d %m.gpiodefault?', 'isGPIOMode', 0, GPIOMODEPULLDOWN],
             ['h', 'when GPIO %d %m.transition', 'when_GPIOChanges', 0, 'rises'],
         ],
         menus: {
             mcp3008ch: ['0','1','2','3','4','5','6','7'],
             spidev: ['0','1'],
             transition: ['falls', 'rises'],
-            gpiodefault: [gpioModeDOut, gpioModePullDown, gpioModePullUp],
-            gpiostate: [gpioHigh,gpioLow],
+            gpiodefault: [GPIOMODEPULLDOUT, GPIOMODEPULLDOWN, GPIOMODEPULLUP],
+            gpiostate: [GPIOHIGH,GPIOLOW],
         },
         url: 'http://info.scratch.mit.edu/WeDo',
         displayName: 'Boeing'
