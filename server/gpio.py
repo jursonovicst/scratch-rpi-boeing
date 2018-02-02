@@ -7,9 +7,9 @@ class Gpio:
     gpioModePullDown = 'pull-down'
     gpioModeDOut = 'd-out'
 
-    gpioHigh = 1
-    gpioLow = 0
-    gpioUnknown = -1
+    gpioHigh = 'high'
+    gpioLow = 'low'
+    gpioUnknown = 'unknown'
 
     def __init__(self):
         # Hardware SPI configuration:
@@ -37,6 +37,10 @@ class Gpio:
             return self.gpioHigh if RPi.GPIO.input(port) == RPi.GPIO.HIGH else self.gpioLow
 
         return self.gpioUnknown
+
+    def setValue(self, port, value):
+        if port in self._ports and RPi.GPIO.gpio_function(port) == RPi.GPIO.OUT and (value == self.gpioLow or value == self.gpioHigh):
+            RPi.GPIO.output(port, True if value == self.gpioHigh else False)
 
     def getValues(self):
         for port in self._ports:

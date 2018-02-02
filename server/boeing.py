@@ -8,38 +8,55 @@ import re
 
 def MakeHandlerClass(mcp, gpio):
     class CustomHandler(BaseHTTPRequestHandler, object):
-        _mcp = {}
 
         def __init__(self, *args, **kwargs):
-             self._mcp['0'] = mcp
+             self._mcps = {mcp.getSpiDev(): mcp}
              self._gpio = gpio
              super(CustomHandler, self).__init__(*args, **kwargs)
 
         def do_GET(self):
             buff = ""
+            retcode = 500
+
+            # Status
             if self.path == "/status":
                 buff += "OK"
+                retcode = 200
 
+            # Polling, return all sensor values
             if self.path == "/poll":
-                for ch, value in self._mcp['0'].getValues():
-                    buff += "mcp3008/%d/%d %d\n" % (0, ch, value)
+                for spidev, mcp in self._mcps.iteritems():
+                    for ch, value in mcp.getValues():
+                        buff += "mcp3008/%d/%d %d\n" % (spidev, ch, value)
                 for port, value in self._gpio.getValues():
                     buff += "gpio/%d %d\n" % (port, value)
+                retcode = 200
 
+            # get specific mcp's value
             m = re.match("/mcp3008/([0-1])/([0-7])", self.path)
             if m is not None:
-                buff += ("mcp3008/%s/%s %d\n" % (m.group(1), m.group(2), self._mcp[m.group(1)].getValue(int(m.group(2)))))
+                buff += ("mcp3008/%s/%s %d\n" % (m.group(1), m.group(2), self._mcps[int(m.group(1))].getValue(int(m.group(2)))))
+                retcode = 200
 
+            # get specific gpio value
             m = re.match("/gpio/([0-9]+)", self.path)
             if m is not None:
-                buff += ("gpio/%d %d\n" % (int(m.group(1)), self._gpio.getValue(int(m.group(1)))) )
+                buff += ("gpio/%d %s\n" % (int(m.group(1)), self._gpio.getValue(int(m.group(1)))) )
+                retcode = 200
 
-            # Commands
+            # init gpio port
             m = re.match("/setupGpio/([0-9]+)/([a-zA-Z0-9_-]+)", self.path)
             if m is not None and 1 <= int(m.group(1)) and int(m.group(1)) <= 26:
                 self._gpio.setup(int(m.group(1)), m.group(2))
+                retcode = 200
 
-            self.send_response(200)
+            # set gpio port
+            m = re.match("/setGpio/([0-9]+)/(%s|%s)" % (gpio.Gpio.gpioHigh, gpio.Gpio.gpioLow), self.path)
+            if m is not None and 1 <= int(m.group(1)) and int(m.group(1)) <= 26:
+                self._gpio.setup(int(m.group(1)), m.group(2))
+                retcode = 200
+
+            self.send_response(retcode)
             self.send_header('Content-type', 'text/html')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()

@@ -21,8 +21,8 @@
     var mcp3008Revert  = [[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]];
 
     const gpioHigh = 1, gpioLow = 0, gpioUnknown = -1;
-    var gpio = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
-    var gpioLast = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
+    var gpio     = [gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown];
+    var gpioLast = [gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown,gpioUnknown];
 
     const gpioModeUnknown = 'unknown', gpioModePullUp = 'pull-up', gpioModePullDown = 'pull-down', gpioModeDOut = 'd-out';
     var gpioMode = [gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown,gpioModeUnknown];
@@ -185,7 +185,19 @@
     // Set digital value
     ext.setGPIO = function( gpiostate, port ) {
         if( gpioMode[port] == gpioModeDOut) {
-            //TODO: command
+            $.ajax({
+                url: boeingAccessURL + "/setGpio/" + port + "/" + gpiostate,
+                dataType: 'text',
+                success: function( data ) {
+                    gpioMode[ port ] = gpioModePullDown;
+                },
+                error: function( jqXHR, textStatus, errorThrown ) {
+                    if ( boeingStatus == 2 ) {
+                        boeingStatus = 1;
+                        boeingStatusMessage = textStatus;
+                    }
+                }
+            });
         }
     }
 
