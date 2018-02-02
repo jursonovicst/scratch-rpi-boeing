@@ -2,9 +2,11 @@
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import signal
-import mcp3008
-import gpio
 import re
+from mcp3008 import MyMCP3008
+from gpio import MyGPIO
+
+
 
 def MakeHandlerClass(mcp, gpio):
     class CustomHandler(BaseHTTPRequestHandler, object):
@@ -87,8 +89,8 @@ def signal_handler(signal, frame):
 if __name__ == "__main__":
     port = 8000
 
-    mcp = mcp3008.Mcp3008(0, 0)
-    gpio = gpio.Gpio()
+    mcp = MyMCP3008(0, 0)
+    gpio = MyGPIO()
 
     HandlerClass = MakeHandlerClass(mcp, gpio)
     httpd = HTTPServer(("0.0.0.0", port), HandlerClass)

@@ -1,13 +1,18 @@
-# Import SPI library (for hardware SPI) and MCP3008 library.
-import Adafruit_GPIO.SPI as SPI
-import Adafruit_MCP3008
+
+try:
+    import Adafruit_GPIO.SPI as SPI
+    from Adafruit_MCP3008 import MCP3008
+except ImportError:
+    print("error importing HW modules, run in simulation mode")
+    from sim import SPI
+    from sim import MCP3008
 
 
-class Mcp3008:
+class MyMCP3008:
     def __init__(self, spiport, spidevice):
         #TODO: use try to catch invalid ports
         # Hardware SPI configuration:
-        self._mcp = Adafruit_MCP3008.MCP3008(spi=SPI.SpiDev(spiport, spidevice))
+        self._mcp = MCP3008(spi=SPI.SpiDev(spiport, spidevice))
         self._spidev = spidevice
 
     def getSpiDev(self):
