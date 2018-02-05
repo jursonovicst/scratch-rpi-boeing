@@ -43,41 +43,33 @@ if __name__ == '__main__':
     else:
         raise ValueError('Unsupported format')
 
-    resample = 0.6
+    volume = 0.5
 
     fr = 20
-    rlen = int(f.getframerate()/fr*resample)
-    wlen = int(f.getframerate()/fr)
+    wlen = f.getframerate()//fr
     device.setperiodsize(wlen)
 
-    data = f.readframes(rlen)
+    data = f.readframes(wlen)
     while data:
         if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
             line = sys.stdin.readline()
 
             if line.strip() == "u":
-                resample += 0.1
-                print("%f" % resample)
+                volume += 0.1
+                print("%f" % volume)
             elif line.strip() == "d":
-                resample -= 0.1
-                print("%f" % resample)
-            rlen = int(f.getframerate() / fr * resample)
-            wlen = int(f.getframerate() / fr)
+                volume -= 0.1
+                print("%f" % volume)
 
         #Read the data, split it in left and right channel (assuming a stereo WAV file).
         da = np.fromstring(data, dtype=dtype)
 
-        left, right = da[0::2], da[1::2]  # left and right channel
-
-        l2 = signal.resample(left,wlen)
-        r2 = signal.resample(right,wlen)
-
-        #Combine the two channels.
-        ns = np.column_stack((l2, r2)).ravel().astype(dtype)
+        # change volume
+        da = np.array(np.clip(da * volume,0,255 ),dtype=np.uint8)
 
         # Read data from stdin
-        device.write(ns.tostring())
-        data = f.readframes(rlen)
+        device.write(da)
+        data = f.readframes(wlen)
 
 
     f.close()
