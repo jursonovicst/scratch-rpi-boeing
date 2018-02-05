@@ -14,10 +14,72 @@ import numpy as np
 from scipy import signal
 
 
+def volume(da, delta):
+    dtype = da.dtype
+    return np.clip(da * delta,np.iinfo(dtype).min,np.iinfo(dtype).max).astype(dtype)
+
+def pitch(da, hz, fr):
+    dtype = da.dtype
+    shift = hz // fr
+
+    #split it in left and right channel (assuming a stereo WAV file).
+    left, right = da[0::2], da[1::2]  # left and right channel
+
+    #Extract the frequencies using the Fast Fourier Transform built into numpy.
+    lf, rf = np.fft.rfft(left), np.fft.rfft(right)
+
+    #Roll the array to increase the pitch.
+    lf, rf = np.roll(lf, shift), np.roll(rf, shift)
+
+    #The highest frequencies roll over to the lowest ones. That's not what we want, so zero them.
+    if shift>0:
+        lf[0:shift], rf[0:shift] = 0, 0
+    else:
+        lf[:-shift], rf[:-shift] = 0, 0
+
+    #Now use the inverse Fourier transform to convert the signal back into amplitude.
+    nl, nr = np.fft.irfft(lf), np.fft.irfft(rf)
+
+    #Combine the two channels.
+    return np.clip(np.column_stack((nl, nr)),np.iinfo(dtype).min,np.iinfo(dtype).max).astype(dtype)
+
+def pitchstretch(da, scale):
+    dtype = da.dtype
+    up, down = scale,1
+
+    1    10 10
+    0.5  5  10
+    1.5  15 10
+
+    #split it in left and right channel (assuming a stereo WAV file).
+    left, right = da[0::2], da[1::2]  # left and right channel
+
+    #Extract the frequencies using the Fast Fourier Transform built into numpy.
+    lf, rf = np.fft.rfft(left), np.fft.rfft(right)
+
+    #Roll the array to increase the pitch.
+    lf, rf = np.roll(lf, shift), np.roll(rf, shift)
+
+    #The highest frequencies roll over to the lowest ones. That's not what we want, so zero them.
+    if shift>0:
+        lf[0:shift], rf[0:shift] = 0, 0
+    else:
+        lf[:-shift], rf[:-shift] = 0, 0
+
+    #Now use the inverse Fourier transform to convert the signal back into amplitude.
+    nl, nr = np.fft.irfft(lf), np.fft.irfft(rf)
+
+    #Combine the two channels.
+    return np.clip(np.column_stack((nl, nr)),np.iinfo(dtype).min,np.iinfo(dtype).max).astype(dtype)
+
+
+
 if __name__ == '__main__':
 
+    print(np.array([1,-33,-3333333,4,5333333333333333332],dtype=np.int16))
+#    exit(0)
 
-    f = wave.open("X320_ENG.wav", 'rb')
+    f = wave.open("dc10.wav", 'rb')
     device = alsaaudio.PCM()
 
     print('%d channels, %d sampling rate, %d sampling width\n' % (f.getnchannels(),
@@ -43,7 +105,7 @@ if __name__ == '__main__':
     else:
         raise ValueError('Unsupported format')
 
-    volume = 0.5
+    delta =     3.1
 
     fr = 20
     wlen = f.getframerate()//fr
@@ -55,20 +117,21 @@ if __name__ == '__main__':
             line = sys.stdin.readline()
 
             if line.strip() == "u":
-                volume += 0.1
-                print("%f" % volume)
+                delta += 0.1
+                print("%f" % delta)
             elif line.strip() == "d":
-                volume -= 0.1
-                print("%f" % volume)
+                delta -= 0.1
+                print("%f" % delta)
 
         #Read the data, split it in left and right channel (assuming a stereo WAV file).
         da = np.fromstring(data, dtype=dtype)
 
         # change volume
-        da = np.array(np.clip(da * volume,0,255 ),dtype=np.uint8)
+        #daa = volume(da, delta)
+        daa = pitch(da, -300,fr)
 
         # Read data from stdin
-        device.write(da)
+        device.write(daa)
         data = f.readframes(wlen)
 
 
