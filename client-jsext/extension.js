@@ -19,17 +19,17 @@
 
 
     // named array indexed by channel string to store actual mcp3008 values
-    var mcp3008  = [];
+    var mcp3008  = [-1,-1,-1,-1,-1,-1,-1,-1];
 
     // named array indexed by channel string to store the last mcp3008 values (for edge detection)
-    var mcp3008Last  = [];
+    var mcp3008Last  = [-1,-1,-1,-1,-1,-1,-1,-1];
 
     // named array indexed by channel string to mark mcp3008 channels to revert
-    var mcp3008Revert  = [];
+    var mcp3008Revert  = [0,0,0,0,0,0,0,0];
 
 
 
-    const GPIOHIGH = 'high', GPIOLOW = 'low', GPIOUNKNOWN = 'unknown';
+    const GPIOHIGH = 'high', GPIOLOW = 'low', GPIOFALLS='falls', GPIORISES='rises', GPIOUNKNOWN = 'unknown';
 
     // named array indexed by port string to store actual GPIO values (both for input and output ports)
     var gpio = [];
@@ -250,12 +250,12 @@
             return false;   // In unknown state (at the beginning)
         }
 
-        if( transition == 'rises' && gpio[port] == GPIOHIGH && gpioLast[port] == GPIOLOW ) {
+        if( transition == GPIORISES && gpio[port] == GPIOHIGH && gpioLast[port] == GPIOLOW ) {
             gpioLast[port] = gpio[port];
             return true;    // Low -> High
         }
 
-        if( transition == 'falls' && gpio[port] == GPIOLOW && gpioLast[port] == GPIOHIGH ) {
+        if( transition == GPIOFALLS && gpio[port] == GPIOLOW && gpioLast[port] == GPIOHIGH ) {
             gpioLast[port] = gpio[port];
             return true;    // High -> Low
         }
@@ -288,24 +288,22 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            [' ', 'v27', 'isGPIOHigh'],
+            [' ', 'v29', 'isGPIOHigh'],
             ['r', 'mcp3008 ch %m.mcp3008ch', 'getMCP3008', 0],
             [' ', 'revert mcp3008 ch %m.mcp3008ch', 'revertMCP3008', 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch changes', 'when_MCP3008changes', 0],
 
             [' ', 'init GPIO %d for %m.gpiodefault', 'initGPIO', 0, GPIOMODEPULLDOWN],
-            [' ', 'set GPIO %d %m.gpiostate', 'setGPIO', 0, 'high'],
+            [' ', 'set GPIO %d to %m.gpiostate', 'setGPIO', 0, 'high'],
             ['b', 'GPIO %d %m.gpiostate?', 'isGPIO', 0, 'low'],
             ['b', 'GPIO %d %m.gpiodefault?', 'isGPIOMode', 0, GPIOMODEPULLDOWN],
             ['h', 'when GPIO %d %m.transition', 'when_GPIOChanges', 0, 'rises'],
 
-            [' ', 'set TLC5947 %d %d', 'setTLC5947', 0, 1],
+            [' ', 'set TLC5947 %d to %d', 'setTLC5947', 0, 1],
         ],
         menus: {
             mcp3008ch: ['0','1','2','3','4','5','6','7'],
-            spidev: ['0','1'],
-            tcp5947state: ['on','off'],
-            transition: ['falls', 'rises'],
+            transition: [GPIOFALLS, GPIORISES],
             gpiodefault: [GPIOMODEPULLDOUT, GPIOMODEPULLDOWN, GPIOMODEPULLUP],
             gpiostate: [GPIOHIGH,GPIOLOW],
         },
