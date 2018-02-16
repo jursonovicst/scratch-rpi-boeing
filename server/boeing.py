@@ -3,7 +3,15 @@
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import signal
 import re
-from mcp3008 import MyMCP3008
+
+
+try:
+    import Adafruit_GPIO.SPI as SPI
+    from Adafruit_MCP3008 import MCP3008
+except ImportError:
+    print("error importing Adafruit HW modules")
+    exit(1)
+
 from gpio import MyGPIO
 
 
@@ -12,7 +20,7 @@ def MakeHandlerClass(mcp, gpio):
     class CustomHandler(BaseHTTPRequestHandler, object):
 
         def __init__(self, *args, **kwargs):
-             self._mcps = {mcp.getSpiDev(): mcp}
+             self._mcp = mcp
              self._gpio = gpio
              super(CustomHandler, self).__init__(*args, **kwargs)
 
@@ -29,17 +37,17 @@ def MakeHandlerClass(mcp, gpio):
 
             # Polling, return all sensor values
             if self.path == "/poll":
-                for spidev, mcp in self._mcps.iteritems():
-                    for ch, value in mcp.getValues():
-                        buff += "mcp3008/%d/%d %d\n" % (spidev, ch, value)
+                for ch in range(0, 8):
+                    buff += "mcp3008/%d %d\n" % (ch, self._mcp.read_adc(ch))
+
                 for port, value in self._gpio.getValues():
                     buff += "gpio/%d %d\n" % (port, value)
                 retcode = 200
 
-            # get specific mcp's value
-            m = re.match("/mcp3008/(\d+)/(\d+)", self.path)
+            # get mcp's value
+            m = re.match("/mcp3008/(\d+)", self.path)
             if m is not None:
-                buff += ("mcp3008/%s/%s %d\n" % (m.group(1), m.group(2), self._mcps[int(m.group(1))].getValue(int(m.group(2)))))
+                buff += ("mcp3008/%s %d\n" % (m.group(1), self._mcp.getValue(int(m.group(1)))))
                 retcode = 200
 
             # get specific gpio value
@@ -89,7 +97,7 @@ def signal_handler(signal, frame):
 if __name__ == "__main__":
     port = 8000
 
-    mcp = MyMCP3008(0, 0)
+    mcp = MCP3008(spi=SPI.SpiDev(0, 0))
     gpio = MyGPIO()
 
     HandlerClass = MakeHandlerClass(mcp, gpio)

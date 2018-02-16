@@ -268,10 +268,13 @@
             ['b', 'GPIO %d %m.gpiostate?', 'isGPIO', 0, 'low'],
             ['b', 'GPIO %d %m.gpiodefault?', 'isGPIOMode', 0, GPIOMODEPULLDOWN],
             ['h', 'when GPIO %d %m.transition', 'when_GPIOChanges', 0, 'rises'],
+
+            ['', 'set TLC5947 %d %m.tcp5947state', 'setTLC5947', 0, 'on'],
         ],
         menus: {
             mcp3008ch: ['0','1','2','3','4','5','6','7'],
             spidev: ['0','1'],
+            tcp5947state: ['on','off'],
             transition: ['falls', 'rises'],
             gpiodefault: [GPIOMODEPULLDOUT, GPIOMODEPULLDOWN, GPIOMODEPULLUP],
             gpiostate: [GPIOHIGH,GPIOLOW],

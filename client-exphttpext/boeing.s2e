@@ -1,10 +1,12 @@
 {	"extensionName": "boeing",
 	"extensionPort": 8000,
 	"blockSpecs": [
-		["r", "read mcp3008 on SPI %m.spidev ch %m.mcp3008ch", "mcp3008",0,0],
+		["r", "read mcp3008 ch %m.mcp3008ch", "mcp3008",0],
+		[" ", "on tlc5947 port %m.tlc5947port", "tlc5947",0],
+		[" ", "off tlc5947 port %m.tlc5947port", "tlc5947",0],
 	],
 	"menus": {
-		"spidev": ["0", "1"],
 		"mcp3008ch": ["0", "1", "2", "3", "4", "5", "6", "7"],
+		"tlc5947port": ["0", "1", "2", "3", "4", "5", "6", "7", ]
 	},
 }
