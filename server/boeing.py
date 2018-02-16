@@ -63,7 +63,7 @@ def MakeHandlerClass(mcp, gpio):
                 retcode = 200
 
             # set gpio port
-            m = re.match("/setGpio/(\d+)/(%s|%s)" % (gpio.Gpio.gpioHigh, gpio.Gpio.gpioLow), self.path)
+            m = re.match("/setGpio/(\d+)/(%s|%s)" % (self._gpio.gpioHigh, self._gpio.gpioLow), self.path)
             if m is not None:
                 self._gpio.setup(int(m.group(1)), m.group(2))
                 retcode = 200

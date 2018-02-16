@@ -3,8 +3,7 @@ try:
     import RPi.GPIO as GPIO
 except ImportError:
     print("error importing HW modules, run in simulation mode")
-    from sim import GPIO
-
+    exit(1)
 
 
 
