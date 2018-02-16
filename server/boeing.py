@@ -13,15 +13,16 @@ except ImportError:
     exit(1)
 
 from gpio import MyGPIO
+from tlc5947 import TLC5947
 
 
-
-def MakeHandlerClass(mcp, gpio):
+def MakeHandlerClass(mcp, gpio, tlc):
     class CustomHandler(BaseHTTPRequestHandler, object):
 
         def __init__(self, *args, **kwargs):
              self._mcp = mcp
              self._gpio = gpio
+             self._tlc = tlc
              super(CustomHandler, self).__init__(*args, **kwargs)
 
         def do_GET(self):
@@ -68,6 +69,12 @@ def MakeHandlerClass(mcp, gpio):
                 self._gpio.setup(int(m.group(1)), m.group(2))
                 retcode = 200
 
+            # set tlc5947 port
+            m = re.match("/setTLC5947/(\d+)/(on|off)", self.path)
+            if m is not None:
+                self._tlc[int(m.group(1))] = 0 if m.group(2) == "off" else 4095
+                retcode = 200
+
             self.send_response(retcode)
             self.send_header('Content-type', 'text/html')
             self.send_header('Access-Control-Allow-Origin', '*')
@@ -99,8 +106,9 @@ if __name__ == "__main__":
 
     mcp = MCP3008(spi=SPI.SpiDev(0, 0))
     gpio = MyGPIO()
+    tlc = TLC5947(spi=SPI.SpiDev(0, 1))
 
-    HandlerClass = MakeHandlerClass(mcp, gpio)
+    HandlerClass = MakeHandlerClass(mcp, gpio, tlc)
     httpd = HTTPServer(("0.0.0.0", port), HandlerClass)
 
     signal.signal(signal.SIGINT, signal_handler)
