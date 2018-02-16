@@ -70,9 +70,9 @@ def MakeHandlerClass(mcp, gpio, tlc):
                 retcode = 200
 
             # set tlc5947 port
-            m = re.match("/setTLC5947/(\d+)/(on|off)", self.path)
+            m = re.match("/setTLC5947/(\d+)/([0-9]+)", self.path)
             if m is not None:
-                self._tlc[int(m.group(1))] = 0 if m.group(2) == "off" else 4095
+                self._tlc[int(m.group(1))] = int(m.group(2))
                 retcode = 200
 
             self.send_response(retcode)
