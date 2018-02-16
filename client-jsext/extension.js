@@ -16,9 +16,17 @@
     var boeingStatus = 2; //  0:not ready(RED), 1:partially ready or warning(YELLOW), 2: fully ready(GREEN)
     var boeingStatusMessage = "uninitialized";
 
-    var mcp3008  = [[]];
-    var mcp3008Last  = [[]];
-    var mcp3008Revert  = [[]];
+
+
+    // named array indexed by channel string to store actual mcp3008 values
+    var mcp3008  = [];
+
+    // named array indexed by channel string to store the last mcp3008 values (for edge detection)
+    var mcp3008Last  = [];
+
+    // named array indexed by channel string to mark mcp3008 channels to revert
+    var mcp3008Revert  = [];
+
 
 
     const GPIOHIGH = 'high', GPIOLOW = 'low', GPIOUNKNOWN = 'unknown';
@@ -29,11 +37,11 @@
     // named array indexed by port string to store the last GPIO values (for edge detection)
     var gpioLast = [];
 
-
     const GPIOMODEUNKNOWN = 'unknown', GPIOMODEPULLUP = 'pull-up', GPIOMODEPULLDOWN = 'pull-down', GPIOMODEPULLDOUT = 'd-out';
 
     // named array indexed by port string to store GPIO port modes (pull-up/down, dout)
     var gpioMode = [];
+
 
 
     // Cleanup function when the extension is unloaded
@@ -74,8 +82,8 @@
                         var elements = lines[i].split(' ');
                         var sensor = elements[0].split('/');
                         switch( sensor[0] ) {
-                            case 'mcp3008':     // mcp3008/<spidev>/<channel> <value>
-                                mcp3008[sensor[1]][sensor[2]] = Math.round(Math.abs(mcp3008Revert[sensor[1]][sensor[2]] - Number(elements[1])) * 250 / 1023 ) / 250;
+                            case 'mcp3008':     // mcp3008/<channel> <value>  (values are mapped to 0..1 range)
+                                mcp3008[sensor[1]] = Math.round(Math.abs(mcp3008Revert[sensor[1]] - Number(elements[1])) * 250 / 1023 ) / 250;
                                 break;
                             case 'gpio':        // gpio/<port> <value>
                                 gpio[sensor[1]] = Number(elements[1]);
@@ -98,36 +106,37 @@
     }
 
 
+
     ///////////////////////
     // MCP3008 functions //
     ///////////////////////
 
     // Read analog value
-    ext.getMCP3008 = function( mcp3008ch, spidev ) {
+    ext.getMCP3008 = function( ch ) {
         //Do not do this extra, wait get last result fro poll:
-        //ext._readData("/mcp3008/" + spidev + "/" + mcp3008ch);
-        return mcp3008[spidev.toString()][mcp3008ch.toString()];
+        return mcp3008[ch.toString()];
     }
 
-    // Replace max-min values (useful for reverse inserted sliding potmeters).
-    ext.revertMCP3008 = function( mcp3008ch, spidev ) {
-        mcp3008Revert[spidev.toString()][mcp3008ch.toString()] = 1023;
+    // Switch max-min values (useful for reverse inserted sliding potmeters).
+    ext.revertMCP3008 = function( ch ) {
+        mcp3008Revert[ch.toString()] = 1023;
     }
 
     // Check for event
-    ext.when_MCP3008changes = function( mcp3008ch, spidev ) {
-        if ( mcp3008Last[spidev.toString()][mcp3008ch.toString()] == mcp3008[spidev.toString()][mcp3008ch.toString()] ) {
+    ext.when_MCP3008changes = function( ch ) {
+        if ( mcp3008Last[ch.toString()] == mcp3008[ch.toString()] ) {
             return false;
         }
 
-        if ( mcp3008[spidev.toString()][mcp3008ch.toString()] == -1 || mcp3008Last[spidev.toString()][mcp3008ch.toString()] == -1 ) {
-            mcp3008Last[spidev.toString()][mcp3008ch.toString()] = mcp3008[spidev.toString()][mcp3008ch.toString()];
+        if ( mcp3008[ch.toString()] == -1 || mcp3008Last[ch.toString()] == -1 ) {
+            mcp3008Last[ch.toString()] = mcp3008[ch.toString()];
             return false;
         }
 
-        mcp3008Last[spidev.toString()][mcp3008ch.toString()] = mcp3008[spidev.toString()][mcp3008ch.toString()];
+        mcp3008Last[ch.toString()] = mcp3008[ch.toString()];
         return true;
     };
+
 
 
     ///////////////////////
@@ -254,22 +263,43 @@
         return false;
     }
 
+
+
+    //////////////////////////
+    // TLC5947 functions    //
+    //////////////////////////
+
+    // Set digital value
+    ext.setTLC5947 = function( ch, value ) {
+        $.ajax({
+            url: boeingAccessURL + "/setTLC5947/" + ch + "/" + Math.round(value * 4095),
+            dataType: 'text',
+            error: function( jqXHR, textStatus, errorThrown ) {
+                if ( boeingStatus == 2 ) {
+                    boeingStatus = 1;
+                    boeingStatusMessage = textStatus;
+                }
+            }
+        });
+    }
+
+
     // Block and block menu descriptions
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            ['', 'v26', 'isGPIOHigh'],
-            ['r', 'mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'getMCP3008', 0, 0],
-            ['', 'revert mcp3008 ch %m.mcp3008ch SPI %m.spidev', 'revertMCP3008', 0, 0],
-            ['h', 'when mcp3008 ch %m.mcp3008ch SPI %m.spidev changes', 'when_MCP3008changes', 0, 0],
+            [' ', 'v27', 'isGPIOHigh'],
+            ['r', 'mcp3008 ch %m.mcp3008ch', 'getMCP3008', 0],
+            [' ', 'revert mcp3008 ch %m.mcp3008ch', 'revertMCP3008', 0],
+            ['h', 'when mcp3008 ch %m.mcp3008ch changes', 'when_MCP3008changes', 0],
 
-            ['', 'init GPIO %d for %m.gpiodefault', 'initGPIO', 0, GPIOMODEPULLDOWN],
-            ['', 'set GPIO %d %m.gpiostate', 'setGPIO', 0, 'high'],
+            [' ', 'init GPIO %d for %m.gpiodefault', 'initGPIO', 0, GPIOMODEPULLDOWN],
+            [' ', 'set GPIO %d %m.gpiostate', 'setGPIO', 0, 'high'],
             ['b', 'GPIO %d %m.gpiostate?', 'isGPIO', 0, 'low'],
             ['b', 'GPIO %d %m.gpiodefault?', 'isGPIOMode', 0, GPIOMODEPULLDOWN],
             ['h', 'when GPIO %d %m.transition', 'when_GPIOChanges', 0, 'rises'],
 
-            ['', 'set TLC5947 %d %m.tcp5947state', 'setTLC5947', 0, 'on'],
+            [' ', 'set TLC5947 %d %d', 'setTLC5947', 0, 1],
         ],
         menus: {
             mcp3008ch: ['0','1','2','3','4','5','6','7'],

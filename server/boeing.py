@@ -45,11 +45,15 @@ def MakeHandlerClass(mcp, gpio, tlc):
                     buff += "gpio/%d %d\n" % (port, value)
                 retcode = 200
 
+
+
             # get mcp's value
             m = re.match("/mcp3008/(\d+)", self.path)
             if m is not None:
                 buff += ("mcp3008/%s %d\n" % (m.group(1), self._mcp.getValue(int(m.group(1)))))
                 retcode = 200
+
+
 
             # get specific gpio value
             m = re.match("/gpio/(\d+)", self.path)
@@ -68,6 +72,8 @@ def MakeHandlerClass(mcp, gpio, tlc):
             if m is not None:
                 self._gpio.setup(int(m.group(1)), m.group(2))
                 retcode = 200
+
+
 
             # set tlc5947 port
             m = re.match("/setTLC5947/(\d+)/([0-9]+)", self.path)
