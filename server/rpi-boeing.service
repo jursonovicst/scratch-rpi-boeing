@@ -1,0 +1,16 @@
+[Unit]
+Description = RPi Boeing Server
+After = network.target
+
+[Service]
+Type = simple
+ExecStart = /usr/bin/python rpi-boeing/boeing.py
+
+Restart = always
+RestartSec = 5
+User = pi
+
+WorkingDirectory = /home/pi/scratch-rpi-boeing/server
+
+[Install]
+WantedBy = multi-user.target
