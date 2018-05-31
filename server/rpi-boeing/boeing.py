@@ -1,20 +1,32 @@
 #!/usr/bin/python
 
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-import signal
-import re
-import argparse
-
-
 try:
+    from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+    import signal
+    import re
+    import argparse
+
+    from gpio import MyGPIO
+    from tlc5947 import TLC5947
+
     import Adafruit_GPIO.SPI as SPI
     from Adafruit_MCP3008 import MCP3008
-except ImportError:
-    print("error importing Adafruit HW modules")
+except ImportError as e:
+    print e.message
     exit(1)
 
-from gpio import MyGPIO
-from tlc5947 import TLC5947
+
+
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description='RPi Boeing daemon.')
+
+parser.add_argument('--port', type=int, default=8000, help='TCP port to listen on')
+parser.add_argument('--bind', help='Bind server to this address', default='0.0.0.0')
+parser.add_argument('--mcp3008', type=int, nargs=2, help='SPI address of the MCP3008 A/D', default=(0,0), metavar=('PORT', 'DEV'))
+parser.add_argument('--tlc5947', type=int, nargs=2, help='SPI address of the MCPTLC5947 LED driver', default=(0,1), metavar=('PORT', 'DEV'))
+
+args = parser.parse_args()
+
+
 
 
 
@@ -98,10 +110,15 @@ def MakeHandlerClass(mcp, gpio, tlc):
     return CustomHandler
 
 
+
+
+
+
+
 httpd = None
 
 def signal_handler(signal, frame):
-    print('You pressed Ctrl+C!')
+    print('Interrupt!')
 
     # return response and shutdown the server
     import threading
@@ -109,22 +126,8 @@ def signal_handler(signal, frame):
     assassin.daemon = True
     assassin.start()
 
-
-
-
-
-parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description='Process some integers.')
-
-parser.add_argument('--port', type=int, default=8000, help='TCP port to listen on')
-parser.add_argument('--bind', help='Bind server to this address', default='0.0.0.0')
-parser.add_argument('--mcp3008', type=int, nargs=2, help='SPI address of the MCP3008 A/D', default=(0,0), metavar=('PORT', 'DEV'))
-parser.add_argument('--tlc5947', type=int, nargs=2, help='SPI address of the MCPTLC5947 LED driver', default=(0,1), metavar=('PORT', 'DEV'))
-
-args = parser.parse_args()
-
 if __name__ == "__main__":
 
-    httpd = None
     try:
         # prepare HW interfaces
         mcp = MCP3008(spi=SPI.SpiDev(args.mcp3008[0], args.mcp3008[1]))
@@ -147,7 +150,7 @@ if __name__ == "__main__":
         httpd.serve_forever()
 
     except Exception as e:
-        print e.message
+        print "Error: " + e.message
 
     if httpd is not None:
         httpd.server_close()
