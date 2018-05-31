@@ -3,6 +3,7 @@
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import signal
 import re
+import argparse
 
 
 try:
@@ -14,6 +15,7 @@ except ImportError:
 
 from gpio import MyGPIO
 from tlc5947 import TLC5947
+
 
 
 def MakeHandlerClass(mcp, gpio, tlc):
@@ -107,20 +109,45 @@ def signal_handler(signal, frame):
     assassin.daemon = True
     assassin.start()
 
+
+
+
+
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description='Process some integers.')
+
+parser.add_argument('--port', type=int, default=8000, help='TCP port to listen on')
+parser.add_argument('--bind', help='Bind server to this address', default='0.0.0.0')
+parser.add_argument('--mcp3008', type=int, nargs=2, help='SPI address of the MCP3008 A/D', default=(0,0), metavar=('PORT', 'DEV'))
+parser.add_argument('--tlc5947', type=int, nargs=2, help='SPI address of the MCPTLC5947 LED driver', default=(0,1), metavar=('PORT', 'DEV'))
+
+args = parser.parse_args()
+
 if __name__ == "__main__":
-    port = 8000
 
-    mcp = MCP3008(spi=SPI.SpiDev(0, 0))
-    gpio = MyGPIO()
-    tlc = TLC5947(spi=SPI.SpiDev(0, 1))
+    httpd = None
+    try:
+        # prepare HW interfaces
+        mcp = MCP3008(spi=SPI.SpiDev(args.mcp3008[0], args.mcp3008[1]))
+        gpio = MyGPIO()
+        tlc = TLC5947(spi=SPI.SpiDev(args.tlc5947[0], args.tlc5947[1]))
 
-    HandlerClass = MakeHandlerClass(mcp, gpio, tlc)
-    httpd = HTTPServer(("0.0.0.0", port), HandlerClass)
+        # create handler
+        HandlerClass = MakeHandlerClass(mcp, gpio, tlc)
+        httpd = HTTPServer((args.bind, args.port), HandlerClass)
 
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
+        # register signals
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
 
-    print "Listening on 0.0.0.0:%d..." % port
-    httpd.serve_forever()
+        # server forever
+        print "Listening on %s:%d" % (args.bind, args.port)
+        print "MCP3008 SPI address: %d.%d" % (args.mcp3008[0], args.mcp3008[1])
+        print "TLC5947 SPI address: %d.%d" % (args.tlc5947[0], args.tlc5947[1])
 
-    httpd.server_close()
+        httpd.serve_forever()
+
+    except Exception as e:
+        print e.message
+
+    if httpd is not None:
+        httpd.server_close()
