@@ -102,10 +102,11 @@ def MakeHandlerClass(mcp, gpio, tlc):
 
             self.wfile.write(buff)
 
-        def log_message(self, format, *args):
-            #TODO: filter poll
-            super(CustomHandler, self).log_message(format, *args)
-            return
+        def log_request(self, code='-', size='-'):
+            if self.path == "/poll" or self.path == "/status":
+                return
+            super(CustomHandler, self).log_request(code, size)
+
 
     return CustomHandler
 
