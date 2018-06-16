@@ -103,7 +103,7 @@
 
         // Set next poll period
         setTimeout(ext._poll, pollInterval);
-    }
+    };
 
 
 
@@ -115,12 +115,12 @@
     ext.getMCP3008 = function( ch ) {
         //Do not do this extra, wait get last result fro poll:
         return mcp3008[ch];
-    }
+    };
 
     // Switch max-min values (useful for reverse inserted sliding potmeters).
     ext.revertMCP3008 = function( ch ) {
         mcp3008Revert[ch] = 1023;
-    }
+    };
 
     // Check for event
     ext.when_MCP3008changes = function( ch ) {
@@ -194,7 +194,7 @@
             default:
                 gpioMode[ port ] = GPIOMODEUNKNOWN;
         }
-    }
+    };
 
     // Set digital value
     ext.setGPIO = function( port, gpiostate ) {
@@ -210,7 +210,7 @@
                 }
             });
         }
-    }
+    };
 
     // Read digital value
     ext.isGPIO = function( port, gpiostate ) {
@@ -220,15 +220,12 @@
         boeingStatus = 1;
         boeingStatusMessage = "GPIO port is not in pull-up nor pull-down mode!"
         return false;
-    }
+    };
 
     // Port mode
     ext.isGPIOMode = function( port, gpioDefault ) {
-        if ( gpioMode[port] === gpioDefault ) {
-                return true;
-        }
-        return false;
-    }
+        return gpioMode[port] === gpioDefault;
+    };
 
     // Check for events
     ext.when_GPIOChanges = function( port, transition ) {
@@ -254,7 +251,7 @@
             }
         }
         return false;
-    }
+    };
 
 
 
@@ -274,14 +271,14 @@
                 }
             }
         });
-    }
+    };
 
 
     // Block and block menu descriptions
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            [' ', 'v31', 'isGPIOHigh'],
+            [' ', 'v32', 'isGPIOHigh'],
             ['r', 'mcp3008 ch %m.mcp3008ch', 'getMCP3008', 0],
             [' ', 'revert mcp3008 ch %m.mcp3008ch', 'revertMCP3008', 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch changes', 'when_MCP3008changes', 0],
