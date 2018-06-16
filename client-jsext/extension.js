@@ -235,10 +235,10 @@
                 return false;   // Not changed
             }
 
-            //if ( gpio[port] === GPIOUNKNOWN || gpioLast[port] === GPIOUNKNOWN ) {
-            //    gpioLast[port] = gpio[port];
-            //    return false;   // In unknown state (at the beginning)
-            //}
+            if ( gpio[port] === GPIOUNKNOWN || gpioLast[port] === GPIOUNKNOWN ) {
+                gpioLast[port] = gpio[port];
+                return false;   // In unknown state (at the beginning)
+            }
 
             if (transition === GPIORISES && gpio[port] === GPIOHIGH && gpioLast[port] === GPIOLOW) {
                 gpioLast[port] = gpio[port];
@@ -278,7 +278,7 @@
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
-            [' ', 'v32', 'isGPIOHigh'],
+            [' ', 'v33', 'isGPIOHigh'],
             ['r', 'mcp3008 ch %m.mcp3008ch', 'getMCP3008', 0],
             [' ', 'revert mcp3008 ch %m.mcp3008ch', 'revertMCP3008', 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch changes', 'when_MCP3008changes', 0],
