@@ -232,29 +232,27 @@
 
     // Check for events
     ext.when_GPIOChanges = function( port, transition ) {
-        if ( gpioMode[port] === GPIOMODEDOUT || gpioMode[port] === GPIOMODEUNKNOWN) {
-            return false;   // Not in input mode
+        if ( gpioMode[port] === GPIOMODEPULLUP || gpioMode[port] === GPIOMODEPULLDOWN) {
+
+            if (gpioLast[port] === gpio[port]) {
+                return false;   // Not changed
+            }
+
+            //if ( gpio[port] === GPIOUNKNOWN || gpioLast[port] === GPIOUNKNOWN ) {
+            //    gpioLast[port] = gpio[port];
+            //    return false;   // In unknown state (at the beginning)
+            //}
+
+            if (transition === GPIORISES && gpio[port] === GPIOHIGH && gpioLast[port] === GPIOLOW) {
+                gpioLast[port] = gpio[port];
+                return true;    // Low -> High
+            }
+
+            if (transition === GPIOFALLS && gpio[port] === GPIOLOW && gpioLast[port] === GPIOHIGH) {
+                gpioLast[port] = gpio[port];
+                return true;    // High -> Low
+            }
         }
-
-        if ( gpioLast[port] === gpio[port] ) {
-            return false;   // Not changed
-        }
-
-        //if ( gpio[port] === GPIOUNKNOWN || gpioLast[port] === GPIOUNKNOWN ) {
-        //    gpioLast[port] = gpio[port];
-        //    return false;   // In unknown state (at the beginning)
-        //}
-
-        if( transition === GPIORISES && gpio[port] === GPIOHIGH && gpioLast[port] === GPIOLOW ) {
-            gpioLast[port] = gpio[port];
-            return true;    // Low -> High
-        }
-
-        if( transition === GPIOFALLS && gpio[port] === GPIOLOW && gpioLast[port] === GPIOHIGH ) {
-            gpioLast[port] = gpio[port];
-            return true;    // High -> Low
-        }
-
         return false;
     }
 
