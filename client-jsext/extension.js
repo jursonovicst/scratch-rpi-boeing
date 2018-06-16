@@ -240,10 +240,10 @@
             return false;   // Not changed
         }
 
-        if ( gpio[port] === GPIOUNKNOWN || gpioLast[port] === GPIOUNKNOWN ) {
-            gpioLast[port] = gpio[port];
-            return false;   // In unknown state (at the beginning)
-        }
+        //if ( gpio[port] === GPIOUNKNOWN || gpioLast[port] === GPIOUNKNOWN ) {
+        //    gpioLast[port] = gpio[port];
+        //    return false;   // In unknown state (at the beginning)
+        //}
 
         if( transition === GPIORISES && gpio[port] === GPIOHIGH && gpioLast[port] === GPIOLOW ) {
             gpioLast[port] = gpio[port];
