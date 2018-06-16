@@ -83,7 +83,7 @@
                         var sensor = elements[0].split('/');
                         switch( sensor[0] ) {
                             case 'mcp3008':     // mcp3008/<channel> <value>  (values are mapped to 0..1 range)
-                                mcp3008[sensor[1]] = Math.round(Math.abs(mcp3008Revert[sensor[1]] - Number(elements[1])) * 250 / 1023 ) / 250;
+                                mcp3008[Number(sensor[1])] = Math.round(Math.abs(mcp3008Revert[Number(sensor[1])] - Number(elements[1])) * 250 / 1023 ) / 250;
                                 break;
                             case 'gpio':        // gpio/<port> <value>
                                 gpio[Number(sensor[1])] = elements[1];
@@ -114,26 +114,26 @@
     // Read analog value
     ext.getMCP3008 = function( ch ) {
         //Do not do this extra, wait get last result fro poll:
-        return mcp3008[ch.toString()];
+        return mcp3008[ch];
     }
 
     // Switch max-min values (useful for reverse inserted sliding potmeters).
     ext.revertMCP3008 = function( ch ) {
-        mcp3008Revert[ch.toString()] = 1023;
+        mcp3008Revert[ch] = 1023;
     }
 
     // Check for event
     ext.when_MCP3008changes = function( ch ) {
-        if ( mcp3008Last[ch.toString()] == mcp3008[ch.toString()] ) {
+        if ( mcp3008Last[ch] === mcp3008[ch] ) {
             return false;
         }
 
-        if ( mcp3008[ch.toString()] == -1 || mcp3008Last[ch.toString()] == -1 ) {
-            mcp3008Last[ch.toString()] = mcp3008[ch.toString()];
+        if ( mcp3008[ch] === -1 || mcp3008Last[ch] === -1 ) {
+            mcp3008Last[ch] = mcp3008[ch];
             return false;
         }
 
-        mcp3008Last[ch.toString()] = mcp3008[ch.toString()];
+        mcp3008Last[ch] = mcp3008[ch];
         return true;
     };
 
@@ -289,18 +289,18 @@
             ['h', 'when mcp3008 ch %m.mcp3008ch changes', 'when_MCP3008changes', 0],
 
             [' ', 'init GPIO %d for %m.gpiodefault', 'initGPIO', 0, GPIOMODEPULLDOWN],
-            [' ', 'set GPIO %d to %m.gpiostate', 'setGPIO', 0, 'high'],
-            ['b', 'GPIO %d %m.gpiostate?', 'isGPIO', 0, 'low'],
+            [' ', 'set GPIO %d to %m.gpiostate', 'setGPIO', 0, GPIOHIGH],
+            ['b', 'GPIO %d %m.gpiostate?', 'isGPIO', 0, GPIOLOW],
             ['b', 'GPIO %d %m.gpiodefault?', 'isGPIOMode', 0, GPIOMODEPULLDOWN],
-            ['h', 'when GPIO %d %m.transition', 'when_GPIOChanges', 0, 'rises'],
+            ['h', 'when GPIO %d %m.transition', 'when_GPIOChanges', 0, GPIORISES],
 
             [' ', 'set TLC5947 %d to %d', 'setTLC5947', 0, 1],
         ],
         menus: {
-            mcp3008ch: ['0','1','2','3','4','5','6','7'],
+            mcp3008ch: [0,1,2,3,4,5,6,7],
             transition: [GPIOFALLS, GPIORISES],
             gpiodefault: [GPIOMODEDOUT, GPIOMODEPULLDOWN, GPIOMODEPULLUP],
-            gpiostate: [GPIOHIGH,GPIOLOW],
+            gpiostate: [GPIOHIGH, GPIOLOW],
         },
         url: 'http://info.scratch.mit.edu/WeDo',
         displayName: 'Boeing'
