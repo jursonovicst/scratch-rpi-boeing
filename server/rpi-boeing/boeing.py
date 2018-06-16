@@ -11,7 +11,6 @@ try:
 
     import Adafruit_GPIO.SPI as SPI
     from Adafruit_MCP3008 import MCP3008
-    from types import *
 
 except ImportError as e:
     print e.message
@@ -25,7 +24,7 @@ parser.add_argument('--port', type=int, default=8000, help='TCP port to listen o
 parser.add_argument('--bind', help='Bind server to this address', default='0.0.0.0')
 parser.add_argument('--mcp3008', type=int, nargs=2, help='SPI address of the MCP3008 A/D', default=(0,0), metavar=('PORT', 'DEV'))
 parser.add_argument('--tlc5947', type=int, nargs=2, help='SPI address of the MCPTLC5947 LED driver', default=(0,1), metavar=('PORT', 'DEV'))
-parser.add_argument('--debug', type=bool, help='turn on verbose logging', default=True)
+parser.add_argument('--debug', action='store_true')
 
 
 args = parser.parse_args()
@@ -38,8 +37,6 @@ def MakeHandlerClass(mcp, gpio, tlc, debug):
     class CustomHandler(BaseHTTPRequestHandler, object):
 
         def __init__(self, *args, **kwargs):
-            assert debug is BooleanType, 'debug is not a boolean: %r' % debug
-
             self._mcp = mcp
             self._gpio = gpio
             self._tlc = tlc
