@@ -217,7 +217,9 @@
         if ( gpioMode[port] === GPIOMODEPULLUP || gpioMode[port] === GPIOMODEPULLDOWN) {
             return gpiostate === GPIOLOW && gpio[port] === GPIOLOW || gpiostate === GPIOHIGH && gpio[port] === GPIOHIGH;
         }
-        return false;   //TODO: handle unknown state
+        boeingStatus = 1;
+        boeingStatusMessage = "GPIO port is not in pull-up nor pull-down mode!"
+        return false;
     }
 
     // Port mode
