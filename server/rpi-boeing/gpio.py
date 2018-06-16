@@ -24,19 +24,19 @@ class MyGPIO:
 
     def setup(self, port, mode):
         #TODO: use try to catch invalid ports
-        if( mode == Gpio.gpioModePullDown ):
+        if( mode == MyGPIO.gpioModePullDown ):
             GPIO.setup(port, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
             if port not in self._ports:
                 self._ports.append(port)
 
         #TODO: use try to catch invalid ports
-        if( mode == Gpio.gpioModePullUp ):
+        if( mode == MyGPIO.gpioModePullUp ):
             GPIO.setup(port, GPIO.IN, pull_up_down=GPIO.PUD_UP)
             if port not in self._ports:
                 self._ports.append(port)
 
         #TODO: use try to catch invalid ports
-        if( mode == Gpio.gpioModeDOut ):
+        if( mode == MyGPIO.gpioModeDOut ):
             GPIO.setup(port, GPIO.OUT, initial=GPIO.LOW )
             if port not in self._ports:
                 self._ports.append(port)

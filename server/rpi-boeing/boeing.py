@@ -11,6 +11,8 @@ try:
 
     import Adafruit_GPIO.SPI as SPI
     from Adafruit_MCP3008 import MCP3008
+    from types import *
+
 except ImportError as e:
     print e.message
     exit(1)
@@ -23,6 +25,8 @@ parser.add_argument('--port', type=int, default=8000, help='TCP port to listen o
 parser.add_argument('--bind', help='Bind server to this address', default='0.0.0.0')
 parser.add_argument('--mcp3008', type=int, nargs=2, help='SPI address of the MCP3008 A/D', default=(0,0), metavar=('PORT', 'DEV'))
 parser.add_argument('--tlc5947', type=int, nargs=2, help='SPI address of the MCPTLC5947 LED driver', default=(0,1), metavar=('PORT', 'DEV'))
+parser.add_argument('--debug', type=bool, help='turn on verbose logging', default=True)
+
 
 args = parser.parse_args()
 
@@ -30,14 +34,17 @@ args = parser.parse_args()
 
 
 
-def MakeHandlerClass(mcp, gpio, tlc):
+def MakeHandlerClass(mcp, gpio, tlc, debug):
     class CustomHandler(BaseHTTPRequestHandler, object):
 
         def __init__(self, *args, **kwargs):
-             self._mcp = mcp
-             self._gpio = gpio
-             self._tlc = tlc
-             super(CustomHandler, self).__init__(*args, **kwargs)
+            assert debug is BooleanType, 'debug is not a boolean: %r' % debug
+
+            self._mcp = mcp
+            self._gpio = gpio
+            self._tlc = tlc
+            self._debug = debug
+            super(CustomHandler, self).__init__(*args, **kwargs)
 
         def do_GET(self):
             buff = ""
@@ -56,7 +63,7 @@ def MakeHandlerClass(mcp, gpio, tlc):
                     buff += "mcp3008/%d %d\n" % (ch, self._mcp.read_adc(ch))
 
                 for port, value in self._gpio.getValues():
-                    buff += "gpio/%d %d\n" % (port, value)
+                    buff += "gpio/%d %s\n" % (port, value)
                 retcode = 200
 
 
@@ -103,7 +110,7 @@ def MakeHandlerClass(mcp, gpio, tlc):
             self.wfile.write(buff)
 
         def log_request(self, code='-', size='-'):
-            if self.path == "/poll" or self.path == "/status":
+            if not self._debug and (self.path == "/poll" or self.path == "/status"):
                 return
             super(CustomHandler, self).log_request(code, size)
 
@@ -136,7 +143,7 @@ if __name__ == "__main__":
         tlc = TLC5947(spi=SPI.SpiDev(args.tlc5947[0], args.tlc5947[1]))
 
         # create handler
-        HandlerClass = MakeHandlerClass(mcp, gpio, tlc)
+        HandlerClass = MakeHandlerClass(mcp, gpio, tlc, args.debug)
         httpd = HTTPServer((args.bind, args.port), HandlerClass)
 
         # register signals
