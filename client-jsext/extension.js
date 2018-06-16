@@ -86,7 +86,7 @@
                                 mcp3008[sensor[1]] = Math.round(Math.abs(mcp3008Revert[sensor[1]] - Number(elements[1])) * 250 / 1023 ) / 250;
                                 break;
                             case 'gpio':        // gpio/<port> <value>
-                                gpio[Number(sensor[1])] = Number(elements[1]);
+                                gpio[Number(sensor[1])] = elements[1];
                                 break;
                         }
                     }
