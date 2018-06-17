@@ -81,7 +81,7 @@
 
     // Periodic communication with the Boeing python daemon, called internally
     ext._poll = function() {
-        if ( boeingStatus != 0) {
+        if ( boeingStatus !== STATUSRED) {
             $.ajax({
                 url: boeingAccessURL + "/poll",
                 dataType: 'text',
@@ -102,10 +102,7 @@
                     }
                 },
                 error: function( jqXHR, textStatus, errorThrown ) {
-                    if ( boeingStatus == STATUSGREEN ) {
-                        boeingStatus = STATUSYELLOW;
-                        boeingStatusMessage = "Last message: " + textStatus;
-                    }
+                    ext._setStatus(STATUSYELLOW, textStatus)
                 }
             });
 
@@ -204,37 +201,57 @@
 
     // Set digital value
     ext.setGPIO = function( port, gpiostate ) {
-        if( gpioMode[port] === GPIOMODEDOUT) {
-            $.ajax({
-                url: boeingAccessURL + "/setGpio/" + port.toString() + "/" + gpiostate,
-                dataType: 'text',
-                error: function( jqXHR, textStatus, errorThrown ) {
-                    if ( boeingStatus == STATUSGREEN ) {
-                        boeingStatus = STATUSYELLOW;
-                        boeingStatusMessage = "Last message: " + textStatus;
-                    }
-                }
-            });
+        if (port < 2 || port > 26) {
+            ext._setStatus( STATUSYELLOW, "Invalid GPIO port '" + port.toString() + "'");
+            return;
         }
+
+        if( gpioMode[port] !== GPIOMODEDOUT) {
+            ext._setStatus( STATUSYELLOW, "GPIO port '" + port.toString() + "' in '" + gpioMode[port] + "' mode");
+            return;
+        }
+
+        $.ajax({
+            url: boeingAccessURL + "/setGpio/" + port.toString() + "/" + gpiostate,
+            dataType: 'text',
+            error: function( jqXHR, textStatus, errorThrown ) {
+                ext._setStatus(STATUSYELLOW, textStatus)
+            }
+        });
     };
 
     // Read digital value
     ext.isGPIO = function( port, gpiostate ) {
+        if (port < 2 || port > 26) {
+            ext._setStatus( STATUSYELLOW, "Invalid GPIO port '" + port.toString() + "'");
+            return;
+        }
+
         if ( gpioMode[port] === GPIOMODEPULLUP || gpioMode[port] === GPIOMODEPULLDOWN) {
             return gpiostate === GPIOLOW && gpio[port] === GPIOLOW || gpiostate === GPIOHIGH && gpio[port] === GPIOHIGH;
         }
-        boeingStatus = STATUSYELLOW;
-        boeingStatusMessage = "Last message: " + "GPIO port is not in pull-up nor pull-down mode!"
+
+        ext._setStatus(STATUSYELLOW, "GPIO port is in '" + gpioMode[port] + "' mode");
         return false;
     };
 
     // Port mode
     ext.isGPIOMode = function( port, gpioDefault ) {
+        if (port < 2 || port > 26) {
+            ext._setStatus( STATUSYELLOW, "Invalid GPIO port '" + port.toString() + "'");
+            return;
+        }
+
         return gpioMode[port] === gpioDefault;
     };
 
     // Check for events
     ext.when_GPIOChanges = function( port, transition ) {
+        if (port < 2 || port > 26) {
+            ext._setStatus( STATUSYELLOW, "Invalid GPIO port '" + port.toString() + "'");
+            return;
+        }
+
         if ( gpioMode[port] === GPIOMODEPULLUP || gpioMode[port] === GPIOMODEPULLDOWN) {
 
             if (gpioLast[port] === gpio[port]) {
