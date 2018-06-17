@@ -1,4 +1,4 @@
-(function (ext) {
+(function (tts) {
     console.log('Text to speech');
 
     var d = new Date();
@@ -18,22 +18,22 @@
 
 
     // Cleanup function when the extension is unloaded
-    ext._shutdown = function (
+    tts._shutdown = function (
         //TODO: code
     ) {
     };
 
 
     // Status reporting code, called by Scratch
-    ext._getStatus = function () {
+    tts._getStatus = function () {
         $.ajax({
             url: boeingAccessURL + '/status',
             dataType: 'text',
             success: function (data) {
-                ext._setStatus(STATUSGREEN);
+                tts._setStatus(STATUSGREEN);
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                ext._setStatus(STATUSRED, textStatus);
+                tts._setStatus(STATUSRED, textStatus);
             }
         });
         return {
@@ -42,7 +42,7 @@
         };
     };
 
-    ext._setStatus = function (stat, message = "") {
+    tts._setStatus = function (stat, message = "") {
         status = stat;
         if (status !== STATUSGREEN && message !== "") {
             statusMessage = d.toISOString() + " " + message;
@@ -55,12 +55,12 @@
     //////////////////////////////
 
     // Read analog value
-    ext.say = function (words) {
+    tts.say = function (words) {
         $.ajax({
             url: boeingAccessURL + "/say/" + encodeURI(words),
             dataType: 'text',
             error: function (jqXHR, textStatus, errorThrown) {
-                ext._setStatus(STATUSYELLOW, textStatus)
+                tts._setStatus(STATUSYELLOW, textStatus)
             }
         });
     };
@@ -77,7 +77,7 @@
     };
 
     // Register the extension
-    ScratchExtensions.register('Text to speech extension', descriptor, ext);
+    ScratchExtensions.register('Text to speech extension', descriptor, tts);
 
 
 })({});
