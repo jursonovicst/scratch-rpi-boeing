@@ -1,4 +1,4 @@
 [
-    { "name":"RPi Boeing", "type":"extension", "file":"rpi-boeing-client-jsext.js", "md5":"rpi-boeing-thumbnail.png", "url":"https://jursonovicst.github.io/scratch-rpi-boeing", "tags":["hardware"]  },
-    { "name":"Text to Speech", "type":"extension", "file":"text-to-speech-jsext.js", "md5":"text-to-speech-thumbnail.png", "url":"https://jursonovicst.github.io/scratch-rpi-boeing", "tags":["hardware"]  }
+    { "name":"Cardplane HW",  "type":"extension", "file":"cardplane-hw-jsext.js",  "md5":"cardplane-hw-thumb.png",  "url":"https://jursonovicst.github.io/scratch-rpi-boeing", "tags":["hardware"]  },
+    { "name":"Cardplane API", "type":"extension", "file":"cardplane-api-jsext.js", "md5":"cardplane-api-thumb.png", "url":"https://jursonovicst.github.io/scratch-rpi-boeing", "tags":["api"]  }
 ]
