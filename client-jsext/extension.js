@@ -1,6 +1,8 @@
 (function(ext) {
     console.log('Boeing');
 
+    var d = new Date();
+
     // in milliseconds
     var pollInterval = 200;
 
@@ -72,7 +74,7 @@
     ext._setStatus = function (status, message="") {
         boeingStatus = status;
         if (status !== STATUSGREEN && message !== "") {
-            boeingStatusMessage = "Last error: " + message;
+            boeingStatusMessage = d.toISOString() + " " + message;
         }
     };
 
