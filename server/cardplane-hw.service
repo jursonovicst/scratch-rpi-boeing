@@ -1,10 +1,10 @@
 [Unit]
-Description = RPi Boeing Server
+Description = Cardplane HW Server
 After = network.target
 
 [Service]
 Type = simple
-ExecStart = /usr/bin/python rpi-boeing/boeing.py
+ExecStart = /usr/bin/python cardplane-hw/boeing.py
 
 Restart = always
 RestartSec = 5
