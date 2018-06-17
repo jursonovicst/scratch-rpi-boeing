@@ -9,7 +9,7 @@
     // Variable is set by user through a Scratch command block
     var debugLevel = 0;
 
-    var serverAccessURL = "http://192.168.2.9:8001";
+    var serverAccessURL = "http://127.0.0.1:8001";
 
     // a variable to set the color of the 'LED' indicator for the extension on the Scratch editor
     var status = 2; //  0:not ready(RED), 1:partially ready or warning(YELLOW), 2: fully ready(GREEN)
