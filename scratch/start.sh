@@ -7,8 +7,8 @@
 echo "starting system check sequence" |festival --tts
 
 # start Scratch2 and load boeing application
-scratch2 /home/pi/scratch-rpi-boeing/scratch/airplaneApp.sbx &
-#scratch2 /home/pi/scratch-rpi-boeing/scratch/airplaneApp.sb2 &
+scratch2 /home/pi/scratch-rpi-boeing/scratch/airplaneApp.sb2 &
+#scratch2 /home/pi/scratch-cardplane-hw/scratch/airplaneApp.sb2 &
 
 # wait for scratch2 to start and load sbx
 sleep 60
