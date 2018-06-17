@@ -38,3 +38,12 @@ sudo ln -s /home/pi/scratch-rpi-boeing/client-jsext/cardplane-api-thumb.png
 Merge the content of `extensions.js` with `/usr/lib/scratch2/scratch_extensions/extensions.json`.
 
 
+
+### Autostart
+
+```bash
+cd ~/scratch-rpi-boeing
+cp airplane.desktop ~/.config/autostart/
+```
+
+
