@@ -50,7 +50,7 @@ def MakeHandlerClass(debug):
 
 
             # text2speech
-            m = re.match("/say/(.+)", self.path)
+            m = re.match("/say(?:until)?/(.+)", self.path)
             if m is not None:
                 festival.sayText(urllib.unquote(m.group(1)))
                 retcode = 200

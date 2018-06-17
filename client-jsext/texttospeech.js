@@ -1,7 +1,10 @@
 (function (tts) {
-    console.log('Text to speech');
+    console.log('Sounds');
 
     var d = new Date();
+
+    // in milliseconds
+    var pollInterval = 200;
 
     // 0 = no debug
     // 1 = low level debug
@@ -27,7 +30,7 @@
     // Status reporting code, called by Scratch
     tts._getStatus = function () {
         $.ajax({
-            url: boeingAccessURL + '/status',
+            url: serverAccessURL + '/status',
             dataType: 'text',
             success: function (data) {
                 tts._setStatus(STATUSGREEN);
@@ -57,7 +60,7 @@
     // Read analog value
     tts.say = function (words) {
         $.ajax({
-            url: boeingAccessURL + "/say/" + encodeURI(words),
+            url: serverAccessURL + "/say/" + encodeURI(words),
             dataType: 'text',
             error: function (jqXHR, textStatus, errorThrown) {
                 tts._setStatus(STATUSYELLOW, textStatus)
@@ -65,12 +68,23 @@
         });
     };
 
+    tts.sayUntil = function (words, callback) {
+        $.ajax({
+            url: serverAccessURL + "/sayuntil/" + encodeURI(words),
+            dataType: 'text',
+            error: function (jqXHR, textStatus, errorThrown) {
+                tts._setStatus(STATUSYELLOW, textStatus)
+            }
+        });
+        callback();
+    };
 
     // Block and block menu descriptions
     var descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
             [' ', 'say %s', 'say', "Hello world!"],
+            ['w', 'say %s until done', 'sayUntil', "Hello world!"],
         ],
         url: 'http://info.scratch.mit.edu/WeDo',
         displayName: 'Text to Speech'
