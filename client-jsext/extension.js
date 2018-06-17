@@ -62,8 +62,7 @@
                 boeingStatus = STATUSGREEN;
             },
             error: function( jqXHR, textStatus, errorThrown ) {
-                boeingStatus = STATUSRED;
-                boeingStatusMessage = "Last message: " + textStatus;
+                ext._setStatus(STATUSRED, textStatus);
             }
         });
         return {status: boeingStatus,
@@ -120,23 +119,37 @@
 
     // Read analog value
     ext.getMCP3008 = function( ch ) {
-        //Do not do this extra, wait get last result fro poll:
+        if (ch < 0 || ch > 7) {
+            ext._setStatus( STATUSYELLOW, "Invalid MCP3008 channel '" + ch.toString() + "'");
+            return -1;
+        }
+
         return mcp3008[ch];
     };
 
     // Switch max-min values (useful for reverse inserted sliding potmeters).
     ext.revertMCP3008 = function( ch ) {
+        if (ch < 0 || ch > 7) {
+            ext._setStatus( STATUSYELLOW, "Invalid MCP3008 channel '" + ch.toString() + "'");
+            return;
+        }
+
         mcp3008Revert[ch] = 1023;
     };
 
     // Check for event
     ext.when_MCP3008changes = function( ch ) {
-        if ( mcp3008Last[ch] === mcp3008[ch] ) {
+        if (ch < 0 || ch > 7) {
+            ext._setStatus( STATUSYELLOW, "Invalid MCP3008 channel '" + ch.toString() + "'");
             return false;
         }
 
         if ( mcp3008[ch] === -1 || mcp3008Last[ch] === -1 ) {
             mcp3008Last[ch] = mcp3008[ch];
+            return false;
+        }
+
+        if ( mcp3008Last[ch] === mcp3008[ch] ) {
             return false;
         }
 
@@ -154,6 +167,7 @@
     ext.initGPIO = function( port, gpioDefault ) {
         if (port < 2 || port > 26) {
             ext._setStatus( STATUSYELLOW, "Invalid GPIO port '" + port.toString() + "'");
+            return false;
         }
 
         switch( gpioDefault ) {
