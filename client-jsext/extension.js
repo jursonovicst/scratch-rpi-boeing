@@ -69,6 +69,13 @@
                 };
     };
 
+    ext._setStatus = function (status, message="") {
+        boeingStatus = status;
+        if (status !== STATUSGREEN && message !== "") {
+            boeingStatusMessage = "Last error: " + message;
+        }
+    };
+
 
     // Periodic communication with the Boeing python daemon, called internally
     ext._poll = function() {
@@ -146,54 +153,50 @@
 
     // Init GPIO default TODO:blocking
     ext.initGPIO = function( port, gpioDefault ) {
+        if (port < 2 || port > 26) {
+            ext._setStatus( STATUSYELLOW, "Invalid GPIO port '" + port.toString() + "'");
+        }
+
         switch( gpioDefault ) {
-            case 'd-out':
+            case GPIOMODEDOUT:
                 $.ajax({
                     url: boeingAccessURL + "/setupGpio/" + port.toString() + "/" + GPIOMODEDOUT,
                     dataType: 'text',
                     success: function( data ) {
-                        gpioMode[ port ] = GPIOMODEDOUT;
+                        gpioMode[ port ] = gpioDefault;
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
-                        if ( boeingStatus == STATUSGREEN ) {
-                            boeingStatus = STATUSYELLOW;
-                            boeingStatusMessage = "Last message: " + textStatus;
-                        }
+                        ext._setStatus(STATUSYELLOW, textStatus)
                     }
                 });
                 break;
-            case 'pull-up':
+            case GPIOMODEPULLUP:
                 $.ajax({
                     url: boeingAccessURL + "/setupGpio/" + port.toString() + "/" + GPIOMODEPULLUP,
                     dataType: 'text',
                     success: function( data ) {
-                        gpioMode[ port ] = GPIOMODEPULLUP;
+                        gpioMode[ port ] = gpioDefault;
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
-                        if ( boeingStatus == STATUSGREEN ) {
-                            boeingStatus = STATUSYELLOW;
-                            boeingStatusMessage = "Last message: " + textStatus;
-                        }
+                        ext._setStatus(STATUSYELLOW, textStatus)
                     }
                 });
                 break;
-            case 'pull-down':
+            case GPIOMODEPULLDOWN:
                 $.ajax({
                     url: boeingAccessURL + "/setupGpio/" + port.toString() + "/" + GPIOMODEPULLDOWN,
                     dataType: 'text',
                     success: function( data ) {
-                        gpioMode[ port ] = GPIOMODEPULLDOWN;
+                        gpioMode[ port ] = gpioDefault;
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
-                        if ( boeingStatus == STATUSGREEN ) {
-                            boeingStatus = STATUSYELLOW;
-                            boeingStatusMessage = "Last message: " + textStatus;
-                        }
+                        ext._setStatus(STATUSYELLOW, textStatus)
                     }
                 });
                 break;
             default:
                 gpioMode[ port ] = GPIOMODEUNKNOWN;
+                ext._setStatus(STATUSYELLOW, "Unknown GPIO port mode '" + gpioDefault + "'")
         }
     };
 
