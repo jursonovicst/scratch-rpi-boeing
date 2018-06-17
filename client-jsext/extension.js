@@ -14,7 +14,8 @@
 
     // a variable to set the color of the 'LED' indicator for the extension on the Scratch editor
     var boeingStatus = 2; //  0:not ready(RED), 1:partially ready or warning(YELLOW), 2: fully ready(GREEN)
-    var boeingStatusMessage = "uninitialized";
+    var boeingStatusMessage = "Uninitialized";
+    const STATUSRED = 0, STATUSYELLOW = 1, STATUSGREEN = 2;
 
 
 
@@ -56,18 +57,18 @@
             url: boeingAccessURL + '/status',
             dataType: 'text',
             success: function( data ) {
-                boeingStatus = 2;
-                boeingStatusMessage = data;
+                boeingStatus = STATUSGREEN;
             },
             error: function( jqXHR, textStatus, errorThrown ) {
-                boeingStatus = 0;
-                boeingStatusMessage = textStatus;
+                boeingStatus = STATUSRED;
+                boeingStatusMessage = "Last message: " + textStatus;
             }
         });
         return {status: boeingStatus,
                 msg: boeingStatusMessage
                 };
     };
+
 
     // Periodic communication with the Boeing python daemon, called internally
     ext._poll = function() {
@@ -92,9 +93,9 @@
                     }
                 },
                 error: function( jqXHR, textStatus, errorThrown ) {
-                    if ( boeingStatus == 2 ) {
-                        boeingStatus = 1;
-                        boeingStatusMessage = textStatus;
+                    if ( boeingStatus == STATUSGREEN ) {
+                        boeingStatus = STATUSYELLOW;
+                        boeingStatusMessage = "Last message: " + textStatus;
                     }
                 }
             });
@@ -154,9 +155,9 @@
                         gpioMode[ port ] = GPIOMODEDOUT;
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
-                        if ( boeingStatus == 2 ) {
-                            boeingStatus = 1;
-                            boeingStatusMessage = textStatus;
+                        if ( boeingStatus == STATUSGREEN ) {
+                            boeingStatus = STATUSYELLOW;
+                            boeingStatusMessage = "Last message: " + textStatus;
                         }
                     }
                 });
@@ -169,9 +170,9 @@
                         gpioMode[ port ] = GPIOMODEPULLUP;
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
-                        if ( boeingStatus == 2 ) {
-                            boeingStatus = 1;
-                            boeingStatusMessage = textStatus;
+                        if ( boeingStatus == STATUSGREEN ) {
+                            boeingStatus = STATUSYELLOW;
+                            boeingStatusMessage = "Last message: " + textStatus;
                         }
                     }
                 });
@@ -184,9 +185,9 @@
                         gpioMode[ port ] = GPIOMODEPULLDOWN;
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
-                        if ( boeingStatus == 2 ) {
-                            boeingStatus = 1;
-                            boeingStatusMessage = textStatus;
+                        if ( boeingStatus == STATUSGREEN ) {
+                            boeingStatus = STATUSYELLOW;
+                            boeingStatusMessage = "Last message: " + textStatus;
                         }
                     }
                 });
@@ -203,9 +204,9 @@
                 url: boeingAccessURL + "/setGpio/" + port.toString() + "/" + gpiostate,
                 dataType: 'text',
                 error: function( jqXHR, textStatus, errorThrown ) {
-                    if ( boeingStatus == 2 ) {
-                        boeingStatus = 1;
-                        boeingStatusMessage = textStatus;
+                    if ( boeingStatus == STATUSGREEN ) {
+                        boeingStatus = STATUSYELLOW;
+                        boeingStatusMessage = "Last message: " + textStatus;
                     }
                 }
             });
@@ -217,8 +218,8 @@
         if ( gpioMode[port] === GPIOMODEPULLUP || gpioMode[port] === GPIOMODEPULLDOWN) {
             return gpiostate === GPIOLOW && gpio[port] === GPIOLOW || gpiostate === GPIOHIGH && gpio[port] === GPIOHIGH;
         }
-        boeingStatus = 1;
-        boeingStatusMessage = "GPIO port is not in pull-up nor pull-down mode!"
+        boeingStatus = STATUSYELLOW;
+        boeingStatusMessage = "Last message: " + "GPIO port is not in pull-up nor pull-down mode!"
         return false;
     };
 
@@ -270,9 +271,9 @@
             url: boeingAccessURL + "/setTLC5947/" + ch + "/" + Math.round(value * 4095),
             dataType: 'text',
             error: function( jqXHR, textStatus, errorThrown ) {
-                if ( boeingStatus == 2 ) {
-                    boeingStatus = 1;
-                    boeingStatusMessage = textStatus;
+                if ( boeingStatus == STATUSGREEN ) {
+                    boeingStatus = STATUSYELLOW;
+                    boeingStatusMessage = "Last message: " + textStatus;
                 }
             }
         });
