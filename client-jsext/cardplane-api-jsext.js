@@ -1,42 +1,25 @@
-(function (tts) {
-    console.log('Sounds');
+(function (ext) {
+    console.log('Loading Cardplane API');
 
-    var d = new Date();
+    let serverAccessURL = "http://127.0.0.1:8001";
 
-    // in milliseconds
-    var pollInterval = 200;
-
-    // 0 = no debug
-    // 1 = low level debug
-    // 2 = high - open the floodgates
-    // Variable is set by user through a Scratch command block
-    var debugLevel = 0;
-
-    var serverAccessURL = "http://127.0.0.1:8001";
 
     // a variable to set the color of the 'LED' indicator for the extension on the Scratch editor
-    var status = 2; //  0:not ready(RED), 1:partially ready or warning(YELLOW), 2: fully ready(GREEN)
-    var statusMessage = "Uninitialized";
-    const STATUSRED = 0, STATUSYELLOW = 1, STATUSGREEN = 2;
-
-
-    // Cleanup function when the extension is unloaded
-    tts._shutdown = function (
-        //TODO: code
-    ) {
-    };
+    const STATUSRED = 0, STATUSYELLOW = 1, STATUSGREEN = 2; //  0:not ready(RED), 1:partially ready or warning(YELLOW), 2: fully ready(GREEN)
+    let status = STATUSRED;
+    let statusMessage = "Uninitialized";
 
 
     // Status reporting code, called by Scratch
-    tts._getStatus = function () {
+    ext._getStatus = function () {
         $.ajax({
             url: serverAccessURL + '/status',
             dataType: 'text',
             success: function (data) {
-                tts._setStatus(STATUSGREEN);
+                ext._setStatus(STATUSGREEN);
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                tts._setStatus(STATUSRED, textStatus);
+                ext._setStatus(STATUSRED, textStatus);
             }
         });
         return {
@@ -45,7 +28,9 @@
         };
     };
 
-    tts._setStatus = function (stat, message = "") {
+    let d = new Date();
+
+    ext._setStatus = function (stat, message = "") {
         status = stat;
         if (status !== STATUSGREEN && message !== "") {
             statusMessage = d.toISOString() + " " + message;
@@ -57,41 +42,50 @@
     // Text to speech functions //
     //////////////////////////////
 
-    // Read analog value
-    tts.say = function (words) {
+    // say
+    ext.say = function (words) {
         $.ajax({
             url: serverAccessURL + "/say/" + encodeURI(words),
             dataType: 'text',
             error: function (jqXHR, textStatus, errorThrown) {
-                tts._setStatus(STATUSYELLOW, textStatus)
+                ext._setStatus(STATUSYELLOW, textStatus)
             }
         });
     };
 
-    tts.sayUntil = function (words, callback) {
+    // say and wait
+    ext.sayUntil = function (words, callback) {
         $.ajax({
             url: serverAccessURL + "/sayuntil/" + encodeURI(words),
             dataType: 'text',
             error: function (jqXHR, textStatus, errorThrown) {
-                tts._setStatus(STATUSYELLOW, textStatus)
+                ext._setStatus(STATUSYELLOW, textStatus)
             }
         });
+        //TODO: implelent wait
         callback();
     };
 
+
+
+    // Cleanup function when the extension is unloaded
+    ext._shutdown = function () {
+        //TODO: code
+    };
+
     // Block and block menu descriptions
-    var descriptor = {
+    let descriptor = {
         blocks: [
             // Block type, block name, function name, param1 default value, param2 default value
             [' ', 'say %s', 'say', "Hello world!"],
             ['w', 'say %s until done', 'sayUntil', "Hello world!"],
         ],
-        url: 'http://info.scratch.mit.edu/WeDo',
-        displayName: 'Text to Speech'
+        url: 'https://github.com/jursonovicst/scratch-rpi-boeing',
+        displayName: 'Cardplane API'
     };
 
     // Register the extension
-    ScratchExtensions.register('Text to speech extension', descriptor, tts);
+    ScratchExtensions.register('Cardplane API', descriptor, ext);
 
 
 })({});

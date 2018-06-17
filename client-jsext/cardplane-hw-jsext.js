@@ -309,8 +309,6 @@
         setTimeout(ext._poll, pollInterval);
     };
 
-
-
     // Cleanup function when the extension is unloaded
     ext._shutdown = function () {
         for (let ch = 0; ch < 24; ch++)
