@@ -29,18 +29,18 @@
 
 
 
-    const GPIOHIGH = 'high', GPIOLOW = 'low', GPIOFALLS='falls', GPIORISES='rises', GPIOUNKNOWN = 'unknown';
+    const GPIOHIGH = 'high', GPIOLOW = 'low', GPIOFALLS='falls', GPIORISES='rises', GPIOCHANGES='changes', GPIOUNKNOWN = 'unknown';
 
     // named array indexed by port string to store actual GPIO values (both for input and output ports)
-    var gpio = [];
+    var gpio = [GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN];
 
     // named array indexed by port string to store the last GPIO values (for edge detection)
-    var gpioLast = [];
+    var gpioLast = [GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN,GPIOUNKNOWN];
 
     const GPIOMODEUNKNOWN = 'unknown', GPIOMODEPULLUP = 'pull-up', GPIOMODEPULLDOWN = 'pull-down', GPIOMODEDOUT = 'd-out';
 
     // named array indexed by port string to store GPIO port modes (pull-up/down, dout)
-    var gpioMode = [];
+    var gpioMode = [GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN,GPIOMODEUNKNOWN];
 
 
 
@@ -240,6 +240,11 @@
                 return false;   // In unknown state (at the beginning)
             }
 
+            if (transition === GPIOCHANGES && gpio[port] !== gpioLast[port]) {
+                gpioLast[port] = gpio[port];
+                return true;
+            }
+
             if (transition === GPIORISES && gpio[port] === GPIOHIGH && gpioLast[port] === GPIOLOW) {
                 gpioLast[port] = gpio[port];
                 return true;    // Low -> High
@@ -293,7 +298,7 @@
         ],
         menus: {
             mcp3008ch: [0,1,2,3,4,5,6,7],
-            transition: [GPIOFALLS, GPIORISES],
+            transition: [GPIOFALLS, GPIORISES, GPIOCHANGES],
             gpiodefault: [GPIOMODEDOUT, GPIOMODEPULLDOWN, GPIOMODEPULLUP],
             gpiostate: [GPIOHIGH, GPIOLOW],
         },
