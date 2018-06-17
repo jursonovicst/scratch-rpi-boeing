@@ -6,7 +6,7 @@
 
     // a variable to set the color of the 'LED' indicator for the extension on the Scratch editor
     const STATUSRED = 0, STATUSYELLOW = 1, STATUSGREEN = 2; //  0:not ready(RED), 1:partially ready or warning(YELLOW), 2: fully ready(GREEN)
-    let status = STATUSRED;
+    let status = STATUSGREEN;
     let statusMessage = "Uninitialized";
 
 
