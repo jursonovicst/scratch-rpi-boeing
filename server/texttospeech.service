@@ -1,0 +1,16 @@
+[Unit]
+Description = Text to Speech
+After = network.target
+
+[Service]
+Type = simple
+ExecStart = /usr/bin/python texttospeech/server.py
+
+Restart = always
+RestartSec = 5
+User = pi
+
+WorkingDirectory = /home/pi/scratch-rpi-boeing/server
+
+[Install]
+WantedBy = multi-user.target
