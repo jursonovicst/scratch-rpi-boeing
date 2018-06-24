@@ -67,6 +67,43 @@
     };
 
 
+    ////////////////////////////
+    // Engine sound functions //
+    ////////////////////////////
+
+    // start
+    ext.enginestart = function (no) {
+        $.ajax({
+            url: serverAccessURL + "/engine/" + no.toString() + "/start",
+            dataType: 'text',
+            error: function (jqXHR, textStatus, errorThrown) {
+                ext._setStatus(STATUSYELLOW, textStatus)
+            }
+        });
+    };
+    // volume
+    ext.enginevolume = function (no, volume) {
+        $.ajax({
+            url: serverAccessURL + "/engine/" + no.toString() + "/volume/" + volume.toString(),
+            dataType: 'text',
+            error: function (jqXHR, textStatus, errorThrown) {
+                ext._setStatus(STATUSYELLOW, textStatus)
+            }
+        });
+    };
+    // stop
+    ext.enginestop = function (no) {
+        $.ajax({
+            url: serverAccessURL + "/engine/" + no.toString() + "/stop",
+            dataType: 'text',
+            error: function (jqXHR, textStatus, errorThrown) {
+                ext._setStatus(STATUSYELLOW, textStatus)
+            }
+        });
+    };
+
+
+
 
     // Cleanup function when the extension is unloaded
     ext._shutdown = function () {
@@ -79,6 +116,9 @@
             // Block type, block name, function name, param1 default value, param2 default value
             [' ', 'say %s', 'say', "Hello world!"],
             ['w', 'say %s until done', 'sayUntil', "Hello world!"],
+            [' ', 'engine %n start', 'enginestart', 0],
+            [' ', 'engine %n volume %n', 'enginevolume', 0, 0],
+            [' ', 'engine %n stop', 'enginestop', 0],
         ],
         url: 'https://github.com/jursonovicst/scratch-rpi-boeing',
         displayName: 'Cardplane API'
