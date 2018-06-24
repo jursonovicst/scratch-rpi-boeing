@@ -54,13 +54,13 @@ class Engine(Thread):
         CHUNK = 2048
         while self._run:
 
-            self._startengine.wait()
-            self._stopengine.clear()
-            while not self._stopengine.is_set() and self._run:
-                data = np.random.uniform(-1, 1, CHUNK)  # 44100 random samples between -1 and 1
-                scaled = np.int16(data / np.max(np.abs(data)) * 32767 * self._volume[0])
-                self._stream.write(scaled)
-            self._startengine.clear()
+            if self._startengine.wait(1):
+                self._stopengine.clear()
+                while not self._stopengine.is_set() and self._run:
+                    data = np.random.uniform(-1, 1, CHUNK)  # 44100 random samples between -1 and 1
+                    scaled = np.int16(data / np.max(np.abs(data)) * 32767 * self._volume[0])
+                    self._stream.write(scaled)
+                self._startengine.clear()
 
 
     def __del__(self):
