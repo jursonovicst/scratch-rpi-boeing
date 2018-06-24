@@ -1,6 +1,7 @@
 (function (ext) {
     console.log('Loading Cardplane HW');
 
+    let poller = null;
     let pollInterval = 200;                                 // how often query sensor's values (in milliseconds)
     let serverAccessURL = "http://192.168.2.9:8000";
 
@@ -275,42 +276,41 @@
     };
 
 
-
     // Periodic communication with the Boeing python daemon, called internally
-    ext._poll = function () {
-        if (status !== STATUSRED) {
-            $.ajax({
-                url: serverAccessURL + "/poll",
-                dataType: 'text',
-                success: function (data) {
-                    // parse answer and update own variables
-                    let lines = data.split('\n');
-                    for (let i = 0; i < lines.length; i++) {
-                        let elements = lines[i].split(' ');
-                        let sensor = elements[0].split('/');
-                        switch (sensor[0]) {
-                            case 'mcp3008':     // mcp3008/<channel> <value>  (values are mapped to 0..1 range)
-                                mcp3008[Number(sensor[1])] = Math.round(Math.abs(mcp3008Revert[Number(sensor[1])] - Number(elements[1])) * 250 / 1023) / 250;
-                                break;
-                            case 'gpio':        // gpio/<port> <value>
-                                gpio[Number(sensor[1])] = elements[1];
-                                break;
+    poller = setInterval(
+        function () {
+            if (status !== STATUSRED) {
+                $.ajax({
+                    url: serverAccessURL + "/poll",
+                    dataType: 'text',
+                    success: function (data) {
+                        // parse answer and update own variables
+                        let lines = data.split('\n');
+                        for (let i = 0; i < lines.length; i++) {
+                            let elements = lines[i].split(' ');
+                            let sensor = elements[0].split('/');
+                            switch (sensor[0]) {
+                                case 'mcp3008':     // mcp3008/<channel> <value>  (values are mapped to 0..1 range)
+                                    mcp3008[Number(sensor[1])] = Math.round(Math.abs(mcp3008Revert[Number(sensor[1])] - Number(elements[1])) * 250 / 1023) / 250;
+                                    break;
+                                case 'gpio':        // gpio/<port> <value>
+                                    gpio[Number(sensor[1])] = elements[1];
+                                    break;
+                            }
                         }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        ext._setStatus(STATUSYELLOW, textStatus)
                     }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    ext._setStatus(STATUSYELLOW, textStatus)
-                }
-            });
+                });
 
-        }
+            }
 
-        // Set next poll period
-        setTimeout(ext._poll, pollInterval);
-    };
+        }, pollInterval);
 
     // Cleanup function when the extension is unloaded
     ext._shutdown = function () {
+        if (poller) poller = clearInterval(poller);
         for (let ch = 0; ch < 24; ch++)
             setTLC5947(ch,0);
 
