@@ -2,6 +2,7 @@ try:
     import pyaudio
     import numpy as np
     from threading import Thread, Event
+    import sys
 except ImportError:
     print("error importing API modules")
     exit(1)
@@ -27,7 +28,8 @@ class Engine(Thread):
         self._stream = self._p.open(format=format,
                         channels=channels,
                         rate=rate,
-                        output=True)
+                        output=True,
+                        start=False)
         self._startengine = Event()
         self._stopengine = Event()
         self._stopengine.set()
@@ -55,12 +57,18 @@ class Engine(Thread):
         while self._run:
 
             if self._startengine.wait(1):
+
+                #received a start event
+                self._stream.start_stream()
                 self._stopengine.clear()
                 while not self._stopengine.is_set() and self._run:
                     data = np.random.uniform(-1, 1, CHUNK)  # 44100 random samples between -1 and 1
                     scaled = np.int16(data / np.max(np.abs(data)) * 32767 * self._volume[0])
                     self._stream.write(scaled)
                 self._startengine.clear()
+                self._stream.stop_stream()
+
+
 
 
     def __del__(self):
@@ -74,7 +82,6 @@ if __name__ == "__main__":
     engine = Engine()
 
     import time
-
     engine.startengine(0)
     time.sleep(1)
     engine.setVolume(0,0.1)
