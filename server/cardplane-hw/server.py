@@ -13,7 +13,7 @@ try:
     from Adafruit_MCP3008 import MCP3008
 
 except ImportError as e:
-    print e.message
+    print(e)
     exit(1)
 
 
