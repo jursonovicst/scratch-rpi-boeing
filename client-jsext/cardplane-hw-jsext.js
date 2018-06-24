@@ -326,13 +326,13 @@
             [' ', 'revert mcp3008 ch %m.mcp3008ch', 'revertMCP3008', 0],
             ['h', 'when mcp3008 ch %m.mcp3008ch changes', 'when_MCP3008changes', 0],
 
-            [' ', 'init GPIO %d for %m.gpiodefault', 'initGPIO', 0, GPIOMODEPULLDOWN],
-            [' ', 'set GPIO %d to %m.gpiostate', 'setGPIO', 0, GPIOHIGH],
-            ['b', 'GPIO %d %m.gpiostate?', 'isGPIO', 0, GPIOLOW],
-            ['b', 'GPIO %d %m.gpiodefault?', 'isGPIOMode', 0, GPIOMODEPULLDOWN],
-            ['h', 'when GPIO %d %m.transition', 'whenGPIOChanges', 0, GPIORISES],
+            [' ', 'init GPIO %n for %m.gpiodefault', 'initGPIO', 0, GPIOMODEPULLDOWN],
+            [' ', 'set GPIO %n to %m.gpiostate', 'setGPIO', 0, GPIOHIGH],
+            ['b', 'GPIO %n %m.gpiostate?', 'isGPIO', 0, GPIOLOW],
+            ['b', 'GPIO %n %m.gpiodefault?', 'isGPIOMode', 0, GPIOMODEPULLDOWN],
+            ['h', 'when GPIO %n %m.transition', 'whenGPIOChanges', 0, GPIORISES],
 
-            [' ', 'set TLC5947 %d to %d', 'setTLC5947', 0, 1],
+            [' ', 'set TLC5947 %n to %n', 'setTLC5947', 0, 1],
         ],
         menus: {
             mcp3008ch: [0, 1, 2, 3, 4, 5, 6, 7],
