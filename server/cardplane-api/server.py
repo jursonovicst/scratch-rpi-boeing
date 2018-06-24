@@ -9,8 +9,10 @@ try:
     import urllib
     import festival
 
+    from engine import Engine
+
 except ImportError as e:
-    print e.message
+    print(e)
     exit(1)
 
 
@@ -30,10 +32,11 @@ args = parser.parse_args()
 
 
 
-def MakeHandlerClass(debug):
+def MakeHandlerClass(engine, debug):
     class CustomHandler(BaseHTTPRequestHandler, object):
 
         def __init__(self, *args, **kwargs):
+            self._engine = engine
             self._debug = debug
             super(CustomHandler, self).__init__(*args, **kwargs)
 
@@ -48,13 +51,32 @@ def MakeHandlerClass(debug):
                 buff += "OK"
                 retcode = 200
 
+            try:
+                # text2speech
+                m = re.match("/say(?:until)?/(.+)", self.path)
+                if m is not None:
+                    festival.sayText(urllib.unquote(m.group(1)))
+                    retcode = 200
 
-            # text2speech
-            m = re.match("/say(?:until)?/(.+)", self.path)
-            if m is not None:
-                festival.sayText(urllib.unquote(m.group(1)))
-                retcode = 200
+                # engine
+                m = re.match("/engine/([0-9]+)/start", self.path)
+                if m is not None:
+                    self._engine.start(int(m.group(1)))
+                    retcode = 200
 
+                m = re.match("/engine/([0-9]+)/([0-9]+(?:\.[0-9]*)?)", self.path)
+                if m is not None:
+                    self._engine.setVolume(int(m.group(1)), float(m.group(2)))
+                    retcode = 200
+
+                m = re.match("/engine/([0-9]+)/stop", self.path)
+                if m is not None:
+                    self._engine.stop(int(m.group(1)))
+                    retcode = 200
+
+            except Exception as e:
+                buff += e.message
+                retcode = 501
 
 
             self.send_response(retcode)
@@ -91,9 +113,13 @@ def signal_handler(signal, frame):
 
 if __name__ == "__main__":
 
+    engine = None
     try:
+        # prepare HW interfaces
+        engine = Engine()
+
         # create handler
-        HandlerClass = MakeHandlerClass(args.debug)
+        HandlerClass = MakeHandlerClass(engine, args.debug)
         httpd = HTTPServer((args.bind, args.port), HandlerClass)
 
         # register signals
@@ -101,12 +127,14 @@ if __name__ == "__main__":
         signal.signal(signal.SIGTERM, signal_handler)
 
         # server forever
-        print "Listening on %s:%d" % (args.bind, args.port)
+        print("Listening on %s:%d" % (args.bind, args.port))
 
         httpd.serve_forever()
 
     except Exception as e:
-        print "Error: " + e.message
+        print("Error: " + e.message)
+    finally:
+        engine.kill()
 
     if httpd is not None:
         httpd.server_close()

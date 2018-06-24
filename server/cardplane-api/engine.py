@@ -12,13 +12,13 @@ from random import randint
 
 class Engine(Thread):
     def __init__(self, format = pyaudio.paInt16, channels = 2, rate = 22050, volume = [0,0]):
-        super().__init__()
+        super(Engine, self).__init__()
 
         if not isinstance(volume, list):
-            raise ValueError(f"Volume is not a list, but {type(volume)}")
+            raise ValueError("Volume is not a list, but %s" % type(volume))
 
         if len(volume) != channels:
-            raise ValueError(f"Volume must have {channels} length!")
+            raise ValueError("Volume must have %s length!" % channels)
 
         self._channels = channels
         self._volume = volume
@@ -34,16 +34,16 @@ class Engine(Thread):
 
         self._run = True
 
-        super().start()
+        super(Engine, self).start()
 
 
     def setVolume(self, ch, volume):
         self._volume[ch] = volume
 
-    def start(self):
+    def start(self, ch):
         self._startengine.set()
 
-    def stop(self):
+    def stop(self, ch):
         self._stopengine.set()
 
     def kill(self):
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     import time
 
-    engine.start()
+    engine.start(0)
     time.sleep(1)
     engine.setVolume(0,0.1)
     time.sleep(1)
@@ -88,12 +88,12 @@ if __name__ == "__main__":
     engine.setVolume(0,0.5)
     time.sleep(1)
     engine.setVolume(0,0.6)
-    engine.stop()
+    engine.stop(0)
 
     time.sleep(5)
 
     engine.setVolume(0,0.1)
-    engine.start()
+    engine.start(0)
     time.sleep(1)
     engine.setVolume(0,0.1)
     time.sleep(1)
@@ -106,6 +106,6 @@ if __name__ == "__main__":
     engine.setVolume(0,0.5)
     time.sleep(1)
     engine.setVolume(0,0.6)
-    engine.stop()
+    engine.stop(0)
 
     engine.kill()
