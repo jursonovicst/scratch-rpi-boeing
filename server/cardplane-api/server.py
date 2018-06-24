@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 try:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
@@ -75,7 +75,7 @@ def MakeHandlerClass(engine, debug):
                     retcode = 200
 
             except Exception as e:
-                buff += e.message
+                buff += str(e)
                 retcode = 501
 
 
