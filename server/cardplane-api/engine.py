@@ -34,16 +34,16 @@ class Engine(Thread):
 
         self._run = True
 
-        super(Engine, self).start()
+        self.start()
 
 
     def setVolume(self, ch, volume):
         self._volume[ch] = volume
 
-    def start(self, ch):
+    def startengine(self, ch):
         self._startengine.set()
 
-    def stop(self, ch):
+    def stopengine(self, ch):
         self._stopengine.set()
 
     def kill(self):
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     import time
 
-    engine.start(0)
+    engine.startengine(0)
     time.sleep(1)
     engine.setVolume(0,0.1)
     time.sleep(1)
@@ -88,12 +88,12 @@ if __name__ == "__main__":
     engine.setVolume(0,0.5)
     time.sleep(1)
     engine.setVolume(0,0.6)
-    engine.stop(0)
+    engine.stopengine(0)
 
     time.sleep(5)
 
     engine.setVolume(0,0.1)
-    engine.start(0)
+    engine.startengine(0)
     time.sleep(1)
     engine.setVolume(0,0.1)
     time.sleep(1)
@@ -106,6 +106,6 @@ if __name__ == "__main__":
     engine.setVolume(0,0.5)
     time.sleep(1)
     engine.setVolume(0,0.6)
-    engine.stop(0)
+    engine.stopengine(0)
 
     engine.kill()

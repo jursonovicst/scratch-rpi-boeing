@@ -61,7 +61,7 @@ def MakeHandlerClass(engine, debug):
                 # engine
                 m = re.match("/engine/([0-9]+)/start", self.path)
                 if m is not None:
-                    self._engine.start(int(m.group(1)))
+                    self._engine.startengine(int(m.group(1)))
                     retcode = 200
 
                 m = re.match("/engine/([0-9]+)/([0-9]+(?:\.[0-9]*)?)", self.path)
@@ -71,7 +71,7 @@ def MakeHandlerClass(engine, debug):
 
                 m = re.match("/engine/([0-9]+)/stop", self.path)
                 if m is not None:
-                    self._engine.stop(int(m.group(1)))
+                    self._engine.stopengine(int(m.group(1)))
                     retcode = 200
 
             except Exception as e:
