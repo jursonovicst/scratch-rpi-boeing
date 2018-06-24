@@ -81,6 +81,7 @@
             }
         });
     };
+
     // volume
     ext.enginevolume = function (no, volume) {
         $.ajax({
@@ -91,6 +92,7 @@
             }
         });
     };
+
     // stop
     ext.enginestop = function (no) {
         $.ajax({
@@ -118,7 +120,7 @@
             ['w', 'say %s until done', 'sayUntil', "Hello world!"],
             [' ', 'engine %n start', 'enginestart', 0],
             [' ', 'engine %n volume %n', 'enginevolume', 0, 0],
-            [' ', 'engine %n stop', 'enginestop', 0],
+            [' ', 'engine %n stop', 'enginestop', 0]
         ],
         url: 'https://github.com/jursonovicst/scratch-rpi-boeing',
         displayName: 'Cardplane API'
