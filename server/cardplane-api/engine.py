@@ -39,13 +39,13 @@ class Engine(Thread):
         self.start()
 
 
-    def setVolume(self, ch, volume):
-        self._volume[ch] = volume
+    def setVolume(self, no, volume):
+        self._volume[no] = volume
 
-    def startengine(self, ch):
+    def startengine(self, no):
         self._startengine.set()
 
-    def stopengine(self, ch):
+    def stopengine(self, no):
         self._stopengine.set()
 
     def kill(self):
