@@ -84,7 +84,7 @@
     // volume
     ext.enginevolume = function (no, volume) {
         $.ajax({
-            url: serverAccessURL + "/engine/" + no.toString() + "/volume/" + volume.toString(),
+            url: serverAccessURL + "/engine/" + no.toString() + "/" + volume.toString(),
             dataType: 'text',
             error: function (jqXHR, textStatus, errorThrown) {
                 ext._setStatus(STATUSYELLOW, textStatus)
