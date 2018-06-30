@@ -1,9 +1,11 @@
+#!/usr/bin/python
+
 import pyaudio
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-class TemplateComponent:
+class TemplateComponent(object):
 
     def __init__(self, rate):
         self._rate = int(rate)
@@ -12,12 +14,12 @@ class TemplateComponent:
 class SingleFrequency(TemplateComponent):
 
     def __init__(self, rate, phase=0):
-        super().__init__(rate)
+        super(SingleFrequency, self).__init__(rate)
         self._frequency = None
-        self._phase = np.float64(phase)
+        self._phase = np.float(phase)
 
     def nextframe(self, count, frequency, power, vibration=0.):
-        assert(count > 0), f"count must be positive, got: '{count}'"
+        assert(count > 0), "count must be positive, got: '%d'" % count
 
         # get the start frequency, phase
         frequency_prev = frequency if self._frequency is None else self._frequency
@@ -25,10 +27,10 @@ class SingleFrequency(TemplateComponent):
 
         # calcualte the frequencies for each step
         if frequency_prev == frequency:
-            frequency_steps = np.ones(count, dtype=np.float64) * frequency
+            frequency_steps = np.ones(count, dtype=np.float) * frequency
         else:
-            frequency_steps = np.arange(frequency_prev, frequency, (frequency-frequency_prev) / count, dtype=np.float64)
-        assert(len(frequency_steps)==count), f"{len(frequency_steps)} sample generated, but {count} required"
+            frequency_steps = np.arange(frequency_prev, frequency, (frequency-frequency_prev) / count, dtype=np.float)[:count]
+        assert(len(frequency_steps)==count), "%d sample generated, but %d required" % (len(frequency_steps), count)
 
         # calculate the phase steps
         phase_steps = 2 * np.pi / self._rate * frequency_steps
@@ -37,26 +39,26 @@ class SingleFrequency(TemplateComponent):
         phase_steps += vibration * np.random.randn(count)
 
         # adjust to start with previous
-        phases = phase_prev + np.cumsum(phase_steps, dtype=np.float64)
+        phases = phase_prev + np.cumsum(phase_steps, dtype=np.float)
 
         # set the next phase, frequency
         self._frequency = frequency
         self._phase = phases[-1]
 
-        return power * np.sin(phases, dtype=np.float64)
+        return power * np.sin(phases, dtype=np.float)
 
 
 class HarmonicFrequency(TemplateComponent):
 
     def __init__(self, rate, ncomp=5):
-        super().__init__(rate)
+        super(HarmonicFrequency, self).__init__(rate)
         self._ncomp = int(ncomp)
         self._components = []
         for i in range(ncomp):
             self._components.append(SingleFrequency(rate))
 
     def nextframe(self, count, frequency, power, pdecay=0.5, vibration=0, vdecay=0.8):
-        wave = np.zeros(count, dtype=np.float64)
+        wave = np.zeros(count, dtype=np.float)
         for i in range(self._ncomp):
             wave += self._components[i].nextframe(count, (i+1) * frequency, pdecay**i * power, vdecay**i * vibration)
 
@@ -67,10 +69,10 @@ class HarmonicFrequency(TemplateComponent):
 class WhiteNoise(TemplateComponent):
 
     def __init__(self):
-        super().__init__(0)
+        super(WhiteNoise, self).__init__(0)
 
     def nextframe(self, count, power):
-        assert(count > 0), f"count must be positive, got: '{count}'"
+        assert(count > 0), "count must be positive, got: '%d'" % count
 
         noise = np.random.randn(count)
         return power * noise
@@ -82,13 +84,13 @@ class Engine(TemplateComponent):
     def thrust2fan(thrust, maxfrequency=200, maxpower=400, cutoff=20, maxvibration=0.02):
         assert(np.max(thrust) <= 100)
         assert(0 <= np.min(thrust))
-        return thrust / 100 * maxfrequency, np.tanh(thrust / cutoff) * maxpower, 0.8, thrust / 100 * maxvibration
+        return maxfrequency * thrust / 100, np.tanh(thrust / cutoff) * maxpower, 0.8, maxvibration * thrust / 100
 
     @staticmethod
     def thrust2compressor(thrust, maxfrequency=500, maxpower=120, cutoff=70, maxvibration=0.005):
         assert(np.max(thrust) <= 100)
         assert(0 <= np.min(thrust))
-        return thrust / 100 * maxfrequency, np.tanh(thrust / cutoff) * maxpower, 0.5, thrust / 100 * maxvibration
+        return maxfrequency * thrust / 100, np.tanh(thrust / cutoff) * maxpower, 0.5, maxvibration * thrust / 100
 
     @staticmethod
     def thrust2wn(thrust, maxpower=20, cutoff=80):
@@ -97,7 +99,7 @@ class Engine(TemplateComponent):
         return maxpower * np.tanh(thrust / cutoff)
 
     def __init__(self, rate):
-        super().__init__(rate)
+        super(Engine, self).__init__(rate)
         self._fan = HarmonicFrequency(rate)
         self._compressor= HarmonicFrequency(rate)
         self._whitenoise = WhiteNoise()
@@ -105,12 +107,13 @@ class Engine(TemplateComponent):
         self._thrust = 0
 
     def setThrust(self, thrust):
-        assert(0 <= thrust), f"Invalid thrust value: {thrust}"
-        assert(thrust <= 100), f"Invalid thrust value: {thrust}"
+        assert(0 <= thrust), "Invalid thrust value: '%d'" % thrust
+        assert(thrust <= 100), "Invalid thrust value: '%d'" % thrust
+        print("Thrust: %d" % thrust)
         self._thrust = thrust
 
     def nextframe(self, count):
-        assert(count > 0), f"count must be positive, got: '{count}'"
+        assert(count > 0), "count must be positive, got: '%d'" % count
 
         wave = np.zeros(count)
 
@@ -124,7 +127,7 @@ class Engine(TemplateComponent):
         wave += self._whitenoise.nextframe(count, wnpower)
 
 
-        assert (len(wave) == count), f"expect: {count} , got: {len(wave)}"
+        assert (len(wave) == count), "expect: %d , got: '%d'" % (count, len(wave))
         return wave.astype(np.int16)
 
     def plot(self):
@@ -153,8 +156,8 @@ class Synth:
         self._pyaudio = pyaudio.PyAudio()
         self._chunk = rate // 10
         self._channels = 2
-        assert(0 < capoutput), f"invalid cap value for output {capoutput}"
-        assert(capoutput <= 1), f"invalid cap value for output {capoutput}"
+        assert(0 < capoutput), "invalid cap value for output %d" % capoutput
+        assert(capoutput <= 1), "invalid cap value for output %d" % capoutput
         self._capoutput = capoutput
         self._stream = self._pyaudio.open(  format=pyaudio.paInt16,
                                 channels=self._channels,
@@ -189,7 +192,7 @@ class Synth:
         limit_bottom = np.iinfo(np.int16).min * self._capoutput
         np.clip(wave, limit_bottom, limit_top)
 
-        assert (len(wave) == frame_count*2), f"expect: {frame_count*2} , got: {len(wave)}"
+        assert (len(wave) == frame_count*2), "expect: %d , got: %d" % (frame_count*2, len(wave))
         return (wave.astype(np.int16), 0)
 
 
@@ -200,9 +203,11 @@ class Synth:
         self._stream.stop_stream()
 
 #    @pyqtSlot(int, int)
-    def get_slider_value(self, thrust_l, thrust_r):
-        self._engine_l.setThrust(thrust_l)
-        self._engine_r.setThrust(thrust_r)
+    def set_thrust(self, thrust_l, thrust_r):
+        if 0 <= thrust_l and thrust_l <= 100:
+            self._engine_l.setThrust(thrust_l)
+        if 0 <= thrust_r and thrust_r <= 100:
+            self._engine_r.setThrust(thrust_r)
 
 
 
@@ -265,12 +270,12 @@ if __name__ == "__main__":
             self._right_engine = value
             self.changedValue.emit(self._left_engine, self._right_engine)
 
-    synth = Synth()
+    synth = Synth(16000,0.5)
 
     app = QApplication(sys.argv)
     sd = Engine_Dialog()
 
-    sd.changedValue.connect(synth.get_slider_value)
+    sd.changedValue.connect(synth.set_thrust)
 
     synth.startaudio()
     sys.exit(app.exec_())

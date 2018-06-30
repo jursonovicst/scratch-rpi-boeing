@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+#BaseHTTServer requires python 2.7
+
 try:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
     import signal
@@ -8,6 +10,7 @@ try:
 
     from gpio import MyGPIO
     from tlc5947 import TLC5947
+    from sound import Synth
 
     import Adafruit_GPIO.SPI as SPI
     from Adafruit_MCP3008 import MCP3008
@@ -24,6 +27,8 @@ parser.add_argument('--port', type=int, default=8000, help='TCP port to listen o
 parser.add_argument('--bind', help='Bind server to this address', default='0.0.0.0')
 parser.add_argument('--mcp3008', type=int, nargs=2, help='SPI address of the MCP3008 A/D', default=(0,0), metavar=('PORT', 'DEV'))
 parser.add_argument('--tlc5947', type=int, nargs=2, help='SPI address of the MCPTLC5947 LED driver', default=(0,1), metavar=('PORT', 'DEV'))
+parser.add_argument('--samplerate', type=int, help='sample rate for sound synthesis', default=(22050))
+
 parser.add_argument('--debug', action='store_true')
 
 
@@ -33,13 +38,14 @@ args = parser.parse_args()
 
 
 
-def MakeHandlerClass(mcp, gpio, tlc, debug):
+def MakeHandlerClass(mcp, gpio, tlc, synth, debug):
     class CustomHandler(BaseHTTPRequestHandler, object):
 
         def __init__(self, *args, **kwargs):
             self._mcp = mcp
             self._gpio = gpio
             self._tlc = tlc
+            self._synth = synth
             self._debug = debug
             super(CustomHandler, self).__init__(*args, **kwargs)
 
@@ -91,13 +97,21 @@ def MakeHandlerClass(mcp, gpio, tlc, debug):
                 self._gpio.setup(int(m.group(1)), m.group(2))
                 retcode = 200
 
-
-
             # set tlc5947 port
             m = re.match("/setTLC5947/(\d+)/([0-9]+)", self.path)
             if m is not None:
                 self._tlc[int(m.group(1))] = int(m.group(2))
                 retcode = 200
+
+            # set thrust value
+            m = re.match("/setSynth/(thrust_l|thrust_r)/([0-9]+)", self.path)
+            if m is not None:
+                if m.group(1) == "thrust_l":
+                    self._synth.set_thrust(int(m.group(2)), -1)
+                else:
+                    self._synth.set_thrust(-1, int(m.group(2)))
+                retcode = 200
+
 
             self.send_response(retcode)
             self.send_header('Content-type', 'text/html')
@@ -133,14 +147,16 @@ def signal_handler(signal, frame):
 
 if __name__ == "__main__":
 
+    synth = None
     try:
         # prepare HW interfaces
         mcp = MCP3008(spi=SPI.SpiDev(args.mcp3008[0], args.mcp3008[1]))
         gpio = MyGPIO()
         tlc = TLC5947(spi=SPI.SpiDev(args.tlc5947[0], args.tlc5947[1]))
+        synth = Synth(rate=args.samplerate)
 
         # create handler
-        HandlerClass = MakeHandlerClass(mcp, gpio, tlc, args.debug)
+        HandlerClass = MakeHandlerClass(mcp, gpio, tlc, synth, args.debug)
         httpd = HTTPServer((args.bind, args.port), HandlerClass)
 
         # register signals
@@ -148,14 +164,19 @@ if __name__ == "__main__":
         signal.signal(signal.SIGTERM, signal_handler)
 
         # server forever
-        print "Listening on %s:%d" % (args.bind, args.port)
-        print "MCP3008 SPI address: %d.%d" % (args.mcp3008[0], args.mcp3008[1])
-        print "TLC5947 SPI address: %d.%d" % (args.tlc5947[0], args.tlc5947[1])
+        print("Listening on %s:%d" % (args.bind, args.port))
+        print("MCP3008 SPI address: %d.%d" % (args.mcp3008[0], args.mcp3008[1]))
+        print("TLC5947 SPI address: %s.%s" % (args.tlc5947[0], args.tlc5947[1]))
+        print("Synth sampling rate: %d" % args.samplerate)
 
+        synth.startaudio()
         httpd.serve_forever()
 
     except Exception as e:
-        print "Error: " + e.message
+        print("Error: %s" % e)
+
+    if synth is not None:
+        synth.stopaudio()
 
     if httpd is not None:
         httpd.server_close()
