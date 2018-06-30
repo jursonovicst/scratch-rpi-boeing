@@ -276,6 +276,24 @@
     };
 
 
+    ////////////////////////
+    // Synth functions    //
+    ////////////////////////
+
+    // Set digital value
+    ext.setTLC5947 = function (synth, value) {
+        $.ajax({
+            url: serverAccessURL + "/setSynth/" + synth.toString() + "/" + value.toString(),
+            dataType: 'text',
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (status === STATUSGREEN) {
+                    status = STATUSYELLOW;
+                    statusMessage = "Last message: " + textStatus;
+                }
+            }
+        });
+    };
+
     // Periodic communication with the Boeing python daemon, called internally
     poller = setInterval(
         function () {
@@ -332,6 +350,9 @@
             ['b', 'GPIO %n %m.gpiodefault?', 'isGPIOMode', 0, GPIOMODEPULLDOWN],
             ['h', 'when GPIO %n %m.transition', 'whenGPIOChanges', 0, GPIORISES],
 
+            [' ', 'set synth %m.synth to %d', 'setSynth', "thrust_l", 0],
+
+
             [' ', 'set TLC5947 %n to %n', 'setTLC5947', 0, 1],
         ],
         menus: {
@@ -339,6 +360,7 @@
             transition: [GPIOFALLS, GPIORISES, GPIOCHANGES],
             gpiodefault: [GPIOMODEDOUT, GPIOMODEPULLDOWN, GPIOMODEPULLUP],
             gpiostate: [GPIOHIGH, GPIOLOW],
+            synth: ["thrust_l", "thrust_r"],
         },
         url: 'https://github.com/jursonovicst/scratch-rpi-boeing',
         displayName: 'Cardplane HW'
