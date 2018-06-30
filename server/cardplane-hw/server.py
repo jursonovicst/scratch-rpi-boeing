@@ -27,7 +27,7 @@ parser.add_argument('--port', type=int, default=8000, help='TCP port to listen o
 parser.add_argument('--bind', help='Bind server to this address', default='0.0.0.0')
 parser.add_argument('--mcp3008', type=int, nargs=2, help='SPI address of the MCP3008 A/D', default=(0,0), metavar=('PORT', 'DEV'))
 parser.add_argument('--tlc5947', type=int, nargs=2, help='SPI address of the MCPTLC5947 LED driver', default=(0,1), metavar=('PORT', 'DEV'))
-parser.add_argument('--samplerate', type=int, help='sample rate for sound synthesis', default=(22050))
+parser.add_argument('--samplerate', type=int, help='sample rate for sound synthesis', default=(16000))
 
 parser.add_argument('--debug', action='store_true')
 
