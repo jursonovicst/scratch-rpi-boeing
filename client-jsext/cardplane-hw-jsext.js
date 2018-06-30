@@ -281,7 +281,7 @@
     ////////////////////////
 
     // Set digital value
-    ext.setTLC5947 = function (synth, value) {
+    ext.setSynth = function (synth, value) {
         $.ajax({
             url: serverAccessURL + "/setSynth/" + synth.toString() + "/" + value.toString(),
             dataType: 'text',
@@ -350,7 +350,7 @@
             ['b', 'GPIO %n %m.gpiodefault?', 'isGPIOMode', 0, GPIOMODEPULLDOWN],
             ['h', 'when GPIO %n %m.transition', 'whenGPIOChanges', 0, GPIORISES],
 
-            [' ', 'set synth %m.synth to %d', 'setSynth', "thrust_l", 0],
+            [' ', 'set synth %m.synth to %n', 'setSynth', "thrust_l", 0],
 
 
             [' ', 'set TLC5947 %n to %n', 'setTLC5947', 0, 1],
@@ -369,7 +369,5 @@
     // Register the extension
     ScratchExtensions.register('Cardplane HW', descriptor, ext);
 
-    //Start polling
-    ext._poll();
 
 })({});
